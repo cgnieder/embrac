@@ -1,0 +1,33 @@
+% arara: pdflatex
+\documentclass{scrartcl}
+\usepackage[T1]{fontenc}
+\usepackage{embrac}
+
+% load desired font
+
+\begin{document}
+% watch the default:
+\DeleteEmph[]
+\DeleteEmph()
+\AddEmph{[}{]}
+\AddEmph{(}{)}
+\emph{This is emphasized [sic] text.}
+
+\emph{This is emphasized text [as you can see].}
+
+\emph{This is (sic) emphasized text.}
+
+\emph{This is emphasized text (as you can see).}
+
+% see your different settings:
+\RenewEmph{[}{]}[.04em][-.12em]
+\RenewEmph{(}[-.04em]{)}[][-.15em]
+\emph{This is emphasized [sic] text.}
+
+\emph{This is emphasized text [as you can see].}
+
+\emph{This is (sic) emphasized text.}
+
+\emph{This is emphasized text (as you can see).}
+
+\end{document}

@@ -6,9 +6,9 @@
 % --------------------------------------------------------------------------
 % the EMBRAC package
 % 
-%   Upright brackets in emphasized text
+%   Upright Brackets in Emphasized Text
 % 
-% 2012/06/28
+% 2012/06/29
 % --------------------------------------------------------------------------
 % Clemens Niederberger
 % Web:    https://bitbucket.org/cgnieder/acro/
@@ -135,7 +135,8 @@
 \usepackage{fixfoot}
 \DeclareFixedFootnote\manythanks{Many thanks for his kind permission to use it!}
 
-\RenewEmph{[}{]}[][-.1em]
+\RenewEmph{[}[][.02em]{]}[.055em][-.08em]
+\RenewEmph{(}[-.01em][.04em]{)}[.04em][-.05em]
 \begin{document}
 
 \section{License and Requirements}\secidx{License}\secidx{Requirements}
@@ -229,18 +230,18 @@ bracket}. The optional \code{<io-kern>} is inserted after the opening bracket
 \embrac initially makes these definitions:
 \begin{beispiel}[code only]
  % add some defaults:
- \AddEmph{(}{)}[.1em]
- \AddEmph{[}{]}[.1em]
+ \AddEmph{[}{]}[.04em][-.12em]
+ \AddEmph{(}[-.04em]{)}[][-.15em]
 \end{beispiel}
 Please notice that \cmd{RenewEmph} only replaces the specified kerning values
 and leaves all others as they've been specified before.
 
 For example, this document uses ``Linux Libertine O''%
 \footnote{\url{http://www.linuxlibertine.org/}} both for the roman and the italic
-font and redefines one of the pairs:
+font and redefines them in this way, still not sure these are the best values:
 \begin{beispiel}[code only]
- \RenewEmph{[}{]}[][-.1em] % in this case this is the same
- % as \RenewEmph{[}{]}[.1em][-.1em]
+ \RenewEmph{[}[][.02em]{]}[.055em][-.08em]
+ \RenewEmph{(}[-.01em][.04em]{)}[.04em][-.05em]
 \end{beispiel}
 
 You can change them as you wish, but be careful with the kerning! What's too less

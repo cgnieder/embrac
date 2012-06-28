@@ -1,9 +1,9 @@
 --------------------------------------------------------------------------
 the EMBRAC package
 
-  Typeset Acronyms
+  Upright Brackets in Emphasized Text
 
-2012/06/27 v0.0c
+2012/06/28 v0.0d
 --------------------------------------------------------------------------
 Clemens Niederberger
 Web:    https://bitbucket.org/cgnieder/embrac/
@@ -31,5 +31,6 @@ feel free to contact me.
 --------------------------------------------------------------------------
 > this package is strongly based on an article by Dominik Waßenhoven in
 > “Die TeXnische Komödie” 2 (2012), pp. 51--53
-> Code parts and idea used with his kind permission. Many thanks!
+> which introduces code by Bruno Le Floch. Code parts and idea used with
+> their kind permission. Many thanks!
 --------------------------------------------------------------------------
