@@ -4,11 +4,11 @@
 % arara: pdflatex
 % arara: pdflatex
 % --------------------------------------------------------------------------
-% the ACRO package
+% the EMBRAC package
 % 
-%   Typeset Acronyms
+%   Upright brackets in emphasized text
 % 
-% 2012/06/22
+% 2012/06/28
 % --------------------------------------------------------------------------
 % Clemens Niederberger
 % Web:    https://bitbucket.org/cgnieder/acro/
@@ -108,6 +108,13 @@
   year    = {2012},
   pages   = {51--53}
 }
+@online{lefloch11,
+  author  = {Bruno Le Floch},
+  title   = {Upright parentheses in italic text},
+  url     = {http://tex.stackexchange.com/a/13057/5049},
+  date    = {2011-03-09},
+  urldate = {2012-06-28}
+}
 \end{filecontents}
 
 % index:
@@ -125,7 +132,10 @@
 \end{filecontents}
 \makeindex
 
-\RenewEmph{[}{]}[.1em][-.1em]
+\usepackage{fixfoot}
+\DeclareFixedFootnote\manythanks{Many thanks for his kind permission to use it!}
+
+\RenewEmph{[}{]}[][-.1em]
 \begin{document}
 
 \section{License and Requirements}\secidx{License}\secidx{Requirements}
@@ -143,7 +153,7 @@ part of the \paket{l3packages}.
  Parentheses and brackets are not letters, and it makes little sense to speak of
  them as roman or italic. There are vertical parentheses and sloped ones, and
  the parentheses on italic fonts are almost always sloped, but vertical parentheses
- are generally to be preferred. Thatr means they must come from the roman font,
+ are generally to be preferred. That means they must come from the roman font,
  and may need extra spacing when used with italic letterforms.
  
  The sloped square brackets usually found on italic fonts are, if anything, even
@@ -158,7 +168,8 @@ part of the \paket{l3packages}.
 Both this quote from \citetitle{bringhurst04} by Robert Bringhurst and the
 article \citetitle{dtk12-dw} by Dominik Waßenhoven \cite{dtk12-dw} inspired
 this package. Indeed, \embrac heavily borrows from the code \citeauthor{dtk12-dw}
-provided in his article\footnote{Many thanks for his kind permission!}.
+provided in his article\manythanks. The code was originally provided by Bruno
+Le~Floch\manythanks\ as an answer to a question on \{TeX.SE\} \cite{lefloch11}.
 
 \embrac tries to redefine \cmd{emph} and \cmd{textit} in a way that neither
 parentheses nor square brackets are sloped. 
@@ -221,10 +232,15 @@ bracket}. The optional \code{<io-kern>} is inserted after the opening bracket
  \AddEmph{(}{)}[.1em]
  \AddEmph{[}{]}[.1em]
 \end{beispiel}
-This document uses ``Linux Libertine O''\footnote{\url{http://www.linuxlibertine.org/}}
-for the roman font and redefines one of the pairs:
+Please notice that \cmd{RenewEmph} only replaces the specified kerning values
+and leaves all others as they've been specified before.
+
+For example, this document uses ``Linux Libertine O''%
+\footnote{\url{http://www.linuxlibertine.org/}} both for the roman and the italic
+font and redefines one of the pairs:
 \begin{beispiel}[code only]
- \RenewEmph{[}{]}[.1em][-.1em]
+ \RenewEmph{[}{]}[][-.1em] % in this case this is the same
+ % as \RenewEmph{[}{]}[.1em][-.1em]
 \end{beispiel}
 
 You can change them as you wish, but be careful with the kerning! What's too less
@@ -234,9 +250,6 @@ for one letter might be too much for others:
  \emph{This is (just) emphasized text.} \\ % looks ok
  \emph{This is emphasized text (as you can see).} % looks bad
 \end{beispiel}
-
-Please notice that \cmd{RenewEmph} only replaces the specified kerning values
-and leaves all others as they've been specified before.
 
 Deleting a pair removes it completely from \embrac's mechanism. All information
 about the pair and it's kerning values will be lost. So if you want the effects
@@ -265,7 +278,7 @@ This is \embrac's only package option:
 
 \section{Turn \embrac Temporarily Off}\secidx{Turn \embrac Temporarily Off}
 Redefining \cmd{emph} and \cmd{textit} is not without danger. Sometimes you might
-fint that you'd want to keep the original definition for a small portion of your
+find that you'd want to keep the original definition for a small portion of your
 document. You can use the following commands whose functions are obvious, I guess:
 \begin{beschreibung}
  \Befehl{EmbracOff}
@@ -274,8 +287,8 @@ document. You can use the following commands whose functions are obvious, I gues
 Both commands are local.
 
 This document for example uses the following lines because \paket{biblatex}
-complained when it tried to typeset \cite{bringhurst04}. Using \cmd{DeleteEmph}[]
-would have worked as well.
+complained when it tried to typeset the entry for \cite{bringhurst04}. Using
+\cmd{DeleteEmph}[] would have worked as well.
 \begin{beispiel}[code only]
  \EmbracOff
  \printbibliography
