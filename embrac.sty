@@ -5,7 +5,7 @@
 % 
 % --------------------------------------------------------------------------
 % Clemens Niederberger
-% Web:    https://bitbucket.org/cgnieder/exsheets/
+% Web:    https://bitbucket.org/cgnieder/embrac/
 % E-Mail: contact@mychemistry.eu
 % --------------------------------------------------------------------------
 % Copyright 2012 Clemens Niederberger
@@ -22,6 +22,10 @@
 % 
 % The Current Maintainer of this work is Clemens Niederberger.
 % --------------------------------------------------------------------------
+% The embrac package consists of the files
+%  - embrac.sty, embrac_en.tex, embrac_en.pdf, embrac_kerning_test.tex and
+%    README
+% --------------------------------------------------------------------------
 % > this package is strongly based on an article by Dominik Waßenhoven in
 % > “Die TeXnische Komödie” 2 (2012), pp. 51--53
 % > which introduces code by Bruno Le Floch. Code parts and idea used with
@@ -31,7 +35,7 @@
 \ProvidesExplPackage
   {embrac}
   {2012/06/29}
-  {0.0d}
+  {0.1}
   {Upright Brackets in Emphasized Text}
 
 \bool_new:N \l_embrac_treat_biblatex_bool
@@ -214,9 +218,13 @@
   }
 
 % user commands:
-\NewDocumentCommand \AddEmph { moomoo }
+\NewDocumentCommand \AddEmph
   {
-    \embrac_add_to_emph:nnnnnn { #1 } { #2 } { #3 } { #4 } { #5 } { #6 }
+    m > { \SplitArgument { 1 } { , } } O{\NoValue,\NoValue}
+    m > { \SplitArgument { 1 } { , } } O{\NoValue,\NoValue}
+  }
+  {
+    \embrac_add_to_emph:nnnnnn { #1 } #2 { #3 } #4
     \ignorespaces
   }
 \NewDocumentCommand \DeleteEmph { mm }
@@ -224,17 +232,22 @@
     \embrac_remove_from_emph:nn { #1 } { #2 }
     \ignorespaces
   }
-\NewDocumentCommand \RenewEmph { moomoo }
+\NewDocumentCommand \RenewEmph
   {
-    \embrac_renew_emph:nnnnnn { #1 } { #2 } { #3 } { #4 } { #5 } { #6 }
+    m > { \SplitArgument { 1 } { , } } O{\NoValue,\NoValue}
+    m > { \SplitArgument { 1 } { , } } O{\NoValue,\NoValue}
+  }
+  {
+    \embrac_renew_emph:nnnnnn { #1 } #2 { #3 } #4
     \ignorespaces
   }
 
 % add some defaults:
-\AddEmph{[}{]}[.04em][-.12em]
-\AddEmph{(}[-.04em]{)}[][-.15em]
+\AddEmph{[}{]}[.04em,-.12em]
+\AddEmph{(}[-.04em]{)}[,-.15em]
 
 \ProcessKeysOptions { embrac }
 
 \tex_endinput:D
 % HISTORY
+2012/06/29 - v0.1 - first public release
