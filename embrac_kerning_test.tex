@@ -50,10 +50,8 @@
 \hrulefill
 
 % without additional kerning at all:
-\DeleteEmph[]
-\DeleteEmph()
-\AddEmph{[}{]}
-\AddEmph{(}{)}
+\RenewEmph{[}{]}
+\RenewEmph{(}{)}
 \emph{This is emphasized [sic] text with [long] bla.}
 
 \emph{This is emphasized text [as you can see].}

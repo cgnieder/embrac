@@ -86,7 +86,7 @@
   EmbracOff,
   EmbracOn,
   printbibliography,
-  RenewEmph
+  ChangeEmph
 }
 
 \usepackage[backend=biber,style=alphabetic]{biblatex}
@@ -136,8 +136,8 @@
 \usepackage{fixfoot}
 \DeclareFixedFootnote\manythanks{Many thanks again for his kind permission to use it!}
 
-\RenewEmph{[}[,.02em]{]}[.055em,-.08em]
-\RenewEmph{(}[-.01em,.04em]{)}[.04em,-.05em]
+\ChangeEmph{[}[,.02em]{]}[.055em,-.08em]
+\ChangeEmph{(}[-.01em,.04em]{)}[.04em,-.05em]
 \begin{document}
 
 \section{License and Requirements}\secidx{License}\secidx{Requirements}
@@ -154,6 +154,12 @@ part of the \paket{l3packages}.
 I like to thank both Dominik Waßenhoven for inspiration~\cite{dtk12-dw} and
 Bruno Le Floch for providing code~\cite{lefloch11}. Without either of them this
 package probably wouldn't exist.
+
+\section{New}
+\begin{description}
+ \item[v0.1a] The command \cmd{RenewEmph} has been renamed into
+ \cmd{ChangeEmph} and a new slightly different \cmd{RenewEmph} has been added.
+\end{description}
 
 \section{About}\label{sec:about}\secidx{About}
 \begin{zitat}[{\cite[85]{bringhurst04}}]
@@ -229,13 +235,15 @@ commands. They all work locally which means if used inside a group outside of it
 everything stays what it was.
 \begin{beschreibung}
  \Befehl{AddEmph}{<o>}\oa{<io-kern>,<oo-kern>}\ma{<c>}\oa{<ic-kern>,<oc-kern>}
+ \Befehl{ChangeEmph}{<o>}\oa{<io-kern>,<oo-kern>}\ma{<c>}\oa{<ic-kern>,<oc-kern>}
  \Befehl{RenewEmph}{<o>}\oa{<io-kern>,<oo-kern>}\ma{<c>}\oa{<ic-kern>,<oc-kern>}
  \Befehl{DeleteEmph}{<o>}\ma{<c>}
 \end{beschreibung}
 Here \code{<o>} means \emph{opening bracket} and \code{<c>} means \emph{closing
 bracket}. The kerning arguments are all four optional and require -- if given --
-to be a length. If they're not given \cmd{AddEmph} inserts \code{0pt} and
-\cmd{RenewEmph} uses the value stored by \cmd{AddEmph} before.
+to be a length. If they're not given \cmd{AddEmph} and \cmd{RenewEmph} insert
+\code{0pt} and \cmd{ChangeEmph} uses the value stored by \cmd{AddEmph} or
+\cmd{RenewEmph} before.
 
 \code{<io-kern>} is inserted after the opening bracket (inner opening),
 \code{<oo-kern>} is inserted before it (outer opening). \code{<ic-kern>} is
@@ -253,14 +261,14 @@ This document however uses ``Linux Libertine O''\footnote{\url{http://www.linuxl
 both for the roman and the italic font and redefines them in this way (still not
 sure these are the best values):
 \begin{beispiel}[code only]
- \RenewEmph{[}[,.02em]{]}[.055em,-.08em]
- \RenewEmph{(}[-.01em,.04em]{)}[.04em,-.05em]
+ \ChangeEmph{[}[,.02em]{]}[.055em,-.08em]
+ \ChangeEmph{(}[-.01em,.04em]{)}[.04em,-.05em]
 \end{beispiel}
 
 You can change them as you wish, but be careful with the kerning! What's too less
 for one letter might be too much for others:
 \begin{beispiel}
- \RenewEmph{(}[.1em]{)}[.1em]
+ \ChangeEmph{(}[.1em]{)}[.1em]
  \emph{This is (just) emphasized text.} \\ % looks ok
  \emph{This is emphasized text (as you can see).} % looks bad
 \end{beispiel}
@@ -273,20 +281,20 @@ with the default settings and with the settings for this document:
  \begin{minipage}{.5\linewidth}
   \textbf{No Kerning:}
   
-  \DeleteEmph[]\DeleteEmph()\AddEmph{[}{]}\AddEmph{(}{)}
+  \RenewEmph{[}{]}\RenewEmph{(}{)}
   \emph{This is emphasized [sic] text.} \\
   \emph{This is emphasized text [as you can see].} \\
-  \emph{This is (sic) emphasized text with (long) bla.} \\
+  \emph{This is emphasized (sic) text.} \\
   \emph{This is emphasized text (as you can see).}
  \end{minipage}\bigskip
  
  \begin{minipage}{.5\linewidth}
   \textbf{\embrac's Default Kerning:}
   
-  \DeleteEmph[]\DeleteEmph()\AddEmph{[}{]}[.04em,-.12em]\AddEmph{(}[-.04em]{)}[,-.15em]
+  \RenewEmph{[}{]}[.04em,-.12em]\RenewEmph{(}[-.04em]{)}[,-.15em]
   \emph{This is emphasized [sic] text.} \\
   \emph{This is emphasized text [as you can see].} \\
-  \emph{This is (sic) emphasized text with (long) bla.} \\
+  \emph{This is emphasized (sic) text.} \\
   \emph{This is emphasized text (as you can see).}
  \end{minipage}\bigskip
  
@@ -295,7 +303,7 @@ with the default settings and with the settings for this document:
   
   \emph{This is emphasized [sic] text.} \\
   \emph{This is emphasized text [as you can see].} \\
-  \emph{This is (sic) emphasized text with (long) bla.} \\
+  \emph{This is emphasized (sic) text.} \\
   \emph{This is emphasized text (as you can see).}
  \end{minipage}
 \end{center}
@@ -310,7 +318,8 @@ to be temporary use grouping.
 \end{beispiel}
 
 By the way: this packages provides a simple file \code{embrac\_kerning\_test.tex}
-for testing kerning values. It should be in the same directory as this documentation.
+for testing kerning values. You should find it in the same directory as this
+documentation.
 \secidx*{Adding More Brackets}\secidx*{Adjusting the Kerning}
 
 \section{biblatex Compatibility}\secidx{biblatex Compatibility}
