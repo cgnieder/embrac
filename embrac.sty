@@ -34,8 +34,8 @@
 \RequirePackage { expl3 , xparse , l3keys2e }
 \ProvidesExplPackage
   {embrac}
-  {2012/06/29}
-  {0.1a}
+  {2012/07/24}
+  {0.1b}
   {Upright Brackets in Emphasized Text}
 
 \bool_new:N \l_embrac_treat_biblatex_bool
@@ -237,8 +237,8 @@
 % user commands:
 \NewDocumentCommand \AddEmph
   {
-    m > { \SplitArgument { 1 } { , } } O{\NoValue,\NoValue}
-    m > { \SplitArgument { 1 } { , } } O{\NoValue,\NoValue}
+    m > { \SplitArgument { 1 } { , } } O{,}
+    m > { \SplitArgument { 1 } { , } } O{,}
   }
   {
     \embrac_add_to_emph:nnnnnn { #1 } #2 { #3 } #4
@@ -253,8 +253,8 @@
 
 \NewDocumentCommand \RenewEmph
   {
-    m > { \SplitArgument { 1 } { , } } O{\NoValue,\NoValue}
-    m > { \SplitArgument { 1 } { , } } O{\NoValue,\NoValue}
+    m > { \SplitArgument { 1 } { , } } O{,}
+    m > { \SplitArgument { 1 } { , } } O{,}
   }
   {
     \embrac_renew_emph:nnnnnn { #1 } #2 { #3 } #4
@@ -263,8 +263,8 @@
 
 \NewDocumentCommand \ChangeEmph
   {
-    m > { \SplitArgument { 1 } { , } } O{\NoValue,\NoValue}
-    m > { \SplitArgument { 1 } { , } } O{\NoValue,\NoValue}
+    m > { \SplitArgument { 1 } { , } } O{,}
+    m > { \SplitArgument { 1 } { , } } O{,}
   }
   {
     \embrac_change_emph:nnnnnn { #1 } #2 { #3 } #4
@@ -282,3 +282,4 @@
 % HISTORY
 2012/06/29 - v0.1  - first public release
 2012/06/29 - v0.1a - renamed \RenewEmph => \ChangeEmph and added new \RenewEmph
+2012/07/24 - v0.1b - adapted to deprecated functions in l3kernel and l3packages
