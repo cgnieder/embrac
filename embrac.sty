@@ -8,7 +8,7 @@
 % Web:    https://bitbucket.org/cgnieder/embrac/
 % E-Mail: contact@mychemistry.eu
 % --------------------------------------------------------------------------
-% Copyright 2012 Clemens Niederberger
+% Copyright 2012--2013 Clemens Niederberger
 % 
 % This work may be distributed and/or modified under the
 % conditions of the LaTeX Project Public License, either version 1.3
@@ -34,8 +34,8 @@
 \RequirePackage { expl3 , xparse , l3keys2e }
 \ProvidesExplPackage
   {embrac}
-  {2012/11/04}
-  {0.2}
+  {2013/03/22}
+  {0.3}
   {Upright Brackets in Emphasized Text}
 
 \bool_new:N \l__embrac_treat_biblatex_bool
@@ -60,26 +60,35 @@
     biblatex          .default:n = true
   }
 
-% save original commands:
-\cs_new_eq:Nc \__embrac_orig_emph:n { emph~ }
-\cs_generate_variant:Nn \__embrac_orig_emph:n { V }
+\prg_new_conditional:Npnn \__embrac_if_fontspec: { T }
+  {
+    \@ifpackageloaded{fontspec}
+      { \prg_return_true: }
+      { \prg_return_false: }
+  }
 
-\cs_new_eq:Nc \__embrac_orig_textit:n { textit~ }
-\cs_generate_variant:Nn \__embrac_orig_textit:n { V }
+% save original commands, delay until begin document to catch `fontspec's
+% redefinitions:
+\AtBeginDocument{
+  \cs_new_eq:Nc \__embrac_orig_emph:n { emph~ }
+  \cs_generate_variant:Nn \__embrac_orig_emph:n { V }
+  \cs_new_eq:Nc \__embrac_orig_textit:n { textit~ }
+  \cs_generate_variant:Nn \__embrac_orig_textit:n { V }
+  \__embrac_if_fontspec:T
+    {
+      \cs_new_eq:Nc \__embrac_orig_textsi:n { textsi~ }
+      \cs_generate_variant:Nn \__embrac_orig_textsi:n { V }
+    }
+}
 
 % preparations:
 \cs_new_eq:NN \embrac_braces_format:n \textup
 \cs_new_eq:NN \__embrac_kern:n \skip_horizontal:n
 
-\cs_new:Npn \__embrac_empty_or_no_value:nTF #1#2#3
+\prg_new_conditional:Npnn \__embrac_empty_or_no_value:n #1 { F,TF }
   {
-    \IfNoValueTF { #1 } { #2 }
-      { \tl_if_blank:nTF { #1 } { #2 } { #3 } }
-  }
-\cs_new:Npn \__embrac_empty_or_no_value:nF #1#2
-  {
-    \IfNoValueF { #1 }
-      { \tl_if_blank:nF { #1 } { #2 } }
+    \IfNoValueTF { #1 } { \prg_return_true: }
+      { \tl_if_blank:nTF { #1 } { \prg_return_true: } { \prg_return_false: } }
   }
 
 % --------------------------------------------------------------------------
@@ -91,7 +100,7 @@
 \prop_new:N \l__embrac_emph_cbrackets_after_prop
 
 % do the replacing:
-\cs_new:Npn \__embrac_replace_brackets:N #1
+\cs_new_protected:Npn \__embrac_replace_brackets:N #1
   {
     \prop_map_inline:Nn \l__embrac_emph_obrackets_prop
       {
@@ -117,7 +126,7 @@
   }
 
 % internal \emph command:
-\cs_new:Npn \__embrac_emph:n #1
+\cs_new_protected:Npn \__embrac_emph:n #1
   {
     \tl_set:Nx \l__embrac_tmpa_tl { #1 }
     \__embrac_replace_brackets:N \l__embrac_tmpa_tl
@@ -125,15 +134,28 @@
   }
 
 % internal \textit command:
-\cs_new:Npn \__embrac_textit:n #1
+\cs_new_protected:Npn \__embrac_textit:n #1
   {
     \tl_set:Nn \l__embrac_tmpa_tl { #1 }
     \__embrac_replace_brackets:N \l__embrac_tmpa_tl
     \__embrac_orig_textit:V \l__embrac_tmpa_tl
   }
 
+% internal \textsi command:
+\AtBeginDocument{
+  \__embrac_if_fontspec:T
+    {
+      \cs_new_protected:Npn \__embrac_textsi:n #1
+        {
+          \tl_set:Nn \l__embrac_tmpa_tl { #1 }
+          \__embrac_replace_brackets:N \l__embrac_tmpa_tl
+          \__embrac_orig_textsi:V \l__embrac_tmpa_tl
+        }
+    }
+  }
+
 % biblatex compatibility:
-\cs_new:Npn \__embrac_treat_bibparens:
+\cs_new_protected:Npn \__embrac_treat_bibparens:
   {
     \bool_if:NT \l__embrac_treat_biblatex_bool
       {
@@ -144,7 +166,7 @@
       }
   }
 
-\cs_new:Npn \__embrac_treat_bibemph:
+\cs_new_protected:Npn \__embrac_treat_bibemph:
   {
     \bool_if:NT \l__embrac_treat_biblatex_bool
       {
@@ -176,6 +198,22 @@
     \group_end:
   }
 
+% internal \textsi command, second layer:
+\AtBeginDocument{
+  \__embrac_if_fontspec:T
+    {
+      \cs_new_protected:Npn \__embrac_new_textsi:w #1#2
+        {
+          \group_begin:
+          \__embrac_treat_bibparens:
+            \IfBooleanTF { #1 }
+              { \__embrac_orig_textsi:n { #2 } }
+              { \__embrac_textsi:n { #2 } }
+          \group_end:
+        }
+    }
+  }
+
 % user command \emph:
 \RenewDocumentCommand \emph { sm }
   { \__embrac_new_emph:w #1 { #2 } }
@@ -183,6 +221,15 @@
 % user command \textit:
 \RenewDocumentCommand \textit { sm }
   { \__embrac_new_textit:w #1 { #2 } }
+
+% user command \textsi:
+\AtBeginDocument{
+  \__embrac_if_fontspec:T
+    {
+      \RenewDocumentCommand \textsi { sm }
+        { \__embrac_new_textsi:w #1 { #2 } }
+    }
+  }
 
 % --------------------------------------------------------------------------
 % TURNING EMBRAC OFF AND ON:
@@ -193,6 +240,8 @@
       { \__embrac_orig_emph:n { ##2 } }
     \RenewDocumentCommand \textit { sm }
       { \__embrac_orig_textit:n { ##2 } }
+    \RenewDocumentCommand \textsi { sm }
+      { \__embrac_orig_textsi:n { ##2 } }
   }
 
 % turning embrac on:
@@ -202,12 +251,14 @@
       { \__embrac_new_emph:w ##1 { ##2 } }
     \RenewDocumentCommand \textit { sm }
       { \__embrac_new_textit:w ##1 { ##2 } }
+    \RenewDocumentCommand \textsi { sm }
+      { \__embrac_new_textsi:w ##1 { ##2 } }
   }
 
 % --------------------------------------------------------------------------
 % ADDING AND REMOVING BRACKETS:
 % internal add command:
-\cs_new:Npn \__embrac_add_to_emph:nnnnnn #1#2#3#4#5#6
+\cs_new_protected:Npn \__embrac_add_to_emph:nnnnnn #1#2#3#4#5#6
   {
     \__embrac_empty_or_no_value:nTF { #2 }
       { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_prop { #1 } { 0pt } }
@@ -224,16 +275,16 @@
   }
 
 % internal delete command:
-\cs_new:Npn \__embrac_remove_from_emph:nn #1#2
+\cs_new_protected:Npn \__embrac_remove_from_emph:nn #1#2
   {
-    \prop_del:Nn \l__embrac_emph_obrackets_prop { #1 }
-    \prop_del:Nn \l__embrac_emph_obrackets_before_prop { #1 }
-    \prop_del:Nn \l__embrac_emph_cbrackets_prop { #2 }
-    \prop_del:Nn \l__embrac_emph_cbrackets_after_prop { #2 }
+    \prop_remove:Nn \l__embrac_emph_obrackets_prop { #1 }
+    \prop_remove:Nn \l__embrac_emph_obrackets_before_prop { #1 }
+    \prop_remove:Nn \l__embrac_emph_cbrackets_prop { #2 }
+    \prop_remove:Nn \l__embrac_emph_cbrackets_after_prop { #2 }
   }
 
 % internal renew command:
-\cs_new:Npn \__embrac_renew_emph:nnnnnn #1#2#3#4#5#6
+\cs_new_protected:Npn \__embrac_renew_emph:nnnnnn #1#2#3#4#5#6
   {
     \__embrac_empty_or_no_value:nTF { #2 }
       { \prop_put:Nnn \l__embrac_emph_obrackets_prop { #1 } { 0pt } }
@@ -250,7 +301,7 @@
   }
 
 % internal change command:
-\cs_new:Npn \__embrac_change_emph:nnnnnn #1#2#3#4#5#6
+\cs_new_protected:Npn \__embrac_change_emph:nnnnnn #1#2#3#4#5#6
   {
     \prop_if_in:NnT \l__embrac_emph_obrackets_prop { #1 }
       {
@@ -321,3 +372,5 @@
 2012/07/24 - v0.1b - adapted to deprecated functions in l3kernel and l3packages
 2012/11/04 - v0.2  - extended `biblatex' option: parens/full
                    - changed buggy definition of \EmbracOff and \EmbracOn
+2013/03/22 - v0.3  - made definitions robust where appropriate
+                   - added support for `fontspec's \textsi

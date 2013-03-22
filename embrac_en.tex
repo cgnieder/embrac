@@ -1,8 +1,7 @@
-% arara: xelatex
-% arara: makeindex: { sort: true, style: embrac_en.ist }
+% arara: pdflatex
 % arara: biber
-% arara: xelatex
-% arara: xelatex
+% arara: pdflatex
+% arara: pdflatex
 % --------------------------------------------------------------------------
 % the EMBRAC package
 % 
@@ -53,50 +52,13 @@
   gobble   = 1
 }
 
-\cnpkgcolors{
-  main   => cnpkgred ,
-  key    => yellow!40!brown ,
-  module => cnpkgblue ,
-  link   => black!90
-}
-
-\usepackage{libertineotf}
-\setmainfont[
-  Numbers={OldStyle,Proportional},
-  SmallCapsFont=Linux Libertine Capitals O,
-  SmallCapsFeatures={LetterSpace=1.5,Scale=.975},
-  SlantedFont=Linux Libertine Slanted O,
-  Ligatures=TeX]{Linux Libertine O}
-\setsansfont[
-  Numbers={OldStyle,Proportional},
-  Scale=1.0025,
-  SmallCapsFont=Linux Biolinum Capitals O,
-  SmallCapsFeatures={LetterSpace=.5,Scale=.95},
-  ItalicFont=Linux Biolinum Slanted O,
-  SlantedFont=Linux Biolinum Slanted O,
-  Ligatures=TeX]{Linux Biolinum O}
-\setmonofont[Scale=.802]{DejaVu Sans Mono}
-
-\makeatletter
-\DeclareRobustCommand{\sustyle}{%
-  \not@math@alphabet\sustyle\relax
-  \addfontfeatures{VerticalPosition=Superior}}
-\DeclareTextFontCommand{\textsu}{\sustyle}
-\def\ifcomma#1{\ifx#1,\expandafter\@firstoftwo\else\expandafter\@secondoftwo\fi}
-\DeclareRobustCommand*\textsuperscript[1]{%
-  \expandafter\ifcomma\expandafter{#1}
-    {\@textsuperscript{\selectfont#1}}
-    {\textsu{#1}}}
-\makeatother
-
+\usepackage{libertinehologopatch}
 \usepackage{fnpct}
-
+\cnpkgusecolorscheme{friendly}
 \renewcommand*\othersectionlevelsformat[3]{%
   \textcolor{main}{#3\autodot}\enskip}
 \renewcommand*\partformat{%
   \textcolor{main}{\partname~\thepart\autodot}}
-\usepackage{scrpage2}
-\pagestyle{scrheadings}
 
 \newcommand*\Default[1]{%
   \hfill\llap{%
@@ -145,25 +107,28 @@
 \end{filecontents}
 
 % index:
-\usepackage{makeidx}
-\begin{filecontents}{\jobname.ist}
+\usepackage{imakeidx}
+\begin{filecontents*}{\jobname.ist}
  heading_prefix "{\\bfseries "
  heading_suffix "\\hfil}\\nopagebreak\n"
  headings_flag  1
- delim_0 "\\dotfill "
- delim_1 "\\dotfill "
- delim_2 "\\dotfill "
- delim_r "\\textendash"
+ delim_0 "\\dotfill\\hyperpage{"
+ delim_1 "\\dotfill\\hyperpage{"
+ delim_2 "\\dotfill\\hyperpage{"
+ delim_r "}\\textendash\\hyperpage{"
+ delim_t "}"
  suffix_2p "\\nohyperpage{\\,f.}"
  suffix_3p "\\nohyperpage{\\,ff.}"
-\end{filecontents}
-\makeindex
+\end{filecontents*}
+\indexsetup{noclearpage,othercode=\footnotesize}
+\makeindex[options={-s \jobname.ist},intoc,columns=3]
 
 \usepackage{fixfoot}
 \DeclareFixedFootnote\manythanks{Many thanks again for his kind permission to use it!}
 
 \RenewEmph{[}[-0.045em,.02em]{]}[.055em,-.09em]
 \ChangeEmph{(}[-.01em,.04em]{)}[.04em,-.05em]
+
 \begin{document}
 
 \section{License and Requirements}\secidx{License}\secidx{Requirements}
@@ -186,10 +151,11 @@ package probably wouldn't exist.
  \item[v0.1a] The command \cmd{RenewEmph} has been renamed into
    \cmd{ChangeEmph} and a new slightly different \cmd{RenewEmph} has been added.
  \item[v0.2] Improved interaction with \paket{biblatex}.
+ \item[v0.3] Added support for \paket*{fontspec}'s \cmd{textsi}.
 \end{description}
 
 \section{About}\label{sec:about}\secidx{About}
-\begin{zitat}[{\cite[85]{bringhurst04}}]
+\begin{zitat}[{{\cite[85]{bringhurst04}}}]
  Parentheses and brackets are not letters, and it makes little sense to speak of
  them as roman or italic. There are vertical parentheses and sloped ones, and
  the parentheses on italic fonts are almost always sloped, but vertical parentheses
@@ -210,7 +176,8 @@ Both this quote from~\citetitle{bringhurst04} by Robert Bringhurst and the
 article \citetitle{dtk12-dw} by Dominik Waßenhoven~\cite{dtk12-dw} inspired
 this package. Indeed, \embrac heavily borrows from the code \citeauthor{dtk12-dw}
 provided in his article\manythanks. The code was originally provided by Bruno
-Le~Floch\manythanks\ answering a question on \{TeX.SE\}~\cite{lefloch11}.
+Le~Floch\manythanks\ answering a question on
+\href{http://tex.stackexchange.com}{TeX.sx}~\cite{lefloch11}.
 
 \embrac tries to redefine \cmd{emph} and \cmd{textit} in a way that neither
 parentheses nor square brackets are sloped. In an ideal world you of course
@@ -228,8 +195,11 @@ Both the commands \cmd{emph} and \cmd{textit} are redefined:
 \begin{beschreibung}
  \Befehl{emph}*{<emphasized text>}
  \Befehl{textit}*{<text in italics>}
+ \Befehl{textsi}*{<text in italic small caps>}\newline
+   This command is only defined and thus redefined if you loaded \paket{fontspec},
+   \emph{i.e.} if you're compiling your document with \XeLaTeX{} or \LuaLaTeX.
 \end{beschreibung}
-They now both have a \code{*} argument that restores the original behaviour.
+They now have a \code{*} argument that restores the original behaviour.
 Otherwise they're used just as before.
 
 Let's see the example again:
@@ -339,7 +309,7 @@ Deleting a pair removes it completely from \embrac's mechanism. All information
 about the pair and its kerning values will be lost. So if you want the effects
 to be temporary use grouping.
 \begin{beispiel}
- \DeleteEmph[]
+ \DeleteEmph{[}{]}
  \emph{This is emphasized [sic] text.} \\
  \emph{This is emphasized text (as you can see).}
 \end{beispiel}
@@ -352,7 +322,7 @@ documentation.
 \section{biblatex Compatibility}\secidx{biblatex Compatibility}
 This is \embrac's only package option:
 \begin{beschreibung}
- \Option{biblatex}{\default{true}|on|parens|false||off|none}\Default{false}
+ \Option{biblatex}{\default{true}|on|parens|false|off|none}\Default{false}
    If set to \code{true} (or one of its aliases) parentheses and squared brackets
    as defined by \paket{biblatex} with \cmd{bibleftparen}, \cmd{bibrightparen},
    \cmd{bibleftbracket} and \cmd{bibrightbracket} are treated the same way (if
@@ -380,8 +350,8 @@ Both commands are local.
 \secidx*{Turn \embrac Temporarily Off}
 
 \section{Watch out!}\secidx{Watch Out}
-Please be aware that \embrac does not affect \cmd{itshape} nor the commands
-\cmd{em} or \cmd{it} (which you shouldn't use in a \LaTeX\ document, anyway).
+Please be aware that \embrac does not affect \cmd{itshape} nor \cmd{em} (nor
+\cmd{it} which you shouldn't use in a \LaTeX{} document, anyway).
 \begin{beispiel}
  \itshape This is italic [sic] text.
 \end{beispiel}
@@ -389,8 +359,7 @@ Please be aware that \embrac does not affect \cmd{itshape} nor the commands
 
 \printbibliography
 
-\setindexpreamble{Section titles are indicated \textbf{bold}, packages
-\textsf{sans serif}, commands \code{\textbackslash\textcolor{code}{brown}}
- and options \textcolor{key}{\code{yellow}}.\par\bigskip}
+\indexprologue{\noindent Section titles are indicated \textbf{bold}, packages
+\textsf{sans serif}, commands \cmd*{brown} and options \key*{yellow}.}
 \printindex
 \end{document}
