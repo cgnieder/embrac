@@ -34,7 +34,7 @@
 \RequirePackage { expl3 , xparse , l3keys2e }
 \ProvidesExplPackage
   {embrac}
-  {2013/05/11}
+  {2013/05/13}
   {0.4}
   {Upright Brackets in Emphasized Text}
 
@@ -326,7 +326,7 @@
 \cs_new_protected:Npn \embrac_add_to_emph:nnnnnn #1#2#3#4#5#6
   {
     \embrac_add_op_to_emph:nnn { #1 } { #2 } { #3 }
-    \embrac_add_op_to_emph:nnn { #4 } { #5 } { #6 }
+    \embrac_add_cl_to_emph:nnn { #4 } { #5 } { #6 }
   }
 
 % internal delete commands:
@@ -517,6 +517,6 @@
 2013/03/22 - v0.3  - made definitions robust where appropriate
                    - added support for `fontspec's \textsi
 2013/04/04 - v0.3a - bug fix in \EmbracOn and \EmbracOff
-2013/05/11 - v0.4  - added versions of \AddEmph, \RenewEmph, \DeleteEmph and
+2013/05/13 - v0.4  - added versions of \AddEmph, \RenewEmph, \DeleteEmph and
                      \ChangeEmph that allow setting opening or closing parts
                      separately
