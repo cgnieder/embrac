@@ -8,7 +8,7 @@
 % Web:    https://bitbucket.org/cgnieder/embrac/
 % E-Mail: contact@mychemistry.eu
 % --------------------------------------------------------------------------
-% Copyright 2012--2013 Clemens Niederberger
+% Copyright 2012--2014 Clemens Niederberger
 % 
 % This work may be distributed and/or modified under the
 % conditions of the LaTeX Project Public License, either version 1.3
@@ -34,8 +34,8 @@
 \RequirePackage { expl3 , xparse , l3keys2e }
 \ProvidesExplPackage
   {embrac}
-  {2013/05/13}
-  {0.4}
+  {2014/05/07}
+  {0.5}
   {Upright Brackets in Emphasized Text}
 
 % --------------------------------------------------------------------------
@@ -75,9 +75,9 @@
     biblatex          .default:n = true
   }
 
-\prg_new_conditional:Npnn \__embrac_if_fontspec: { T }
+\prg_new_conditional:Npnn \embrac_if_fontspec: { T,F,TF }
   {
-    \@ifpackageloaded{fontspec}
+    \@ifpackageloaded {fontspec}
       { \prg_return_true: }
       { \prg_return_false: }
   }
@@ -85,26 +85,29 @@
 % save original commands, delay until begin document to catch `fontspec's
 % redefinitions:
 \AtBeginDocument{
-  \cs_new_eq:Nc \__embrac_orig_emph:n { emph~ }
-  \cs_generate_variant:Nn \__embrac_orig_emph:n { V }
-  \cs_new_eq:Nc \__embrac_orig_textit:n { textit~ }
-  \cs_generate_variant:Nn \__embrac_orig_textit:n { V }
-  \__embrac_if_fontspec:T
+  \cs_new_eq:Nc \embrac_orig_emph:n { emph~ }
+  \cs_generate_variant:Nn \embrac_orig_emph:n { V }
+  \cs_new_eq:Nc \embrac_orig_textit:n { textit~ }
+  \cs_generate_variant:Nn \embrac_orig_textit:n { V }
+  \embrac_if_fontspec:T
     {
-      \cs_new_eq:Nc \__embrac_orig_textsi:n { textsi~ }
-      \cs_generate_variant:Nn \__embrac_orig_textsi:n { V }
+      \cs_new_eq:Nc \embrac_orig_textsi:n { textsi~ }
+      \cs_generate_variant:Nn \embrac_orig_textsi:n { V }
     }
 }
 
 % preparations:
 \cs_new_eq:NN \embrac_braces_format:n \textup
-\cs_new_eq:NN \__embrac_kern:n \skip_horizontal:n
+\cs_new_eq:NN \embrac_kern:n \skip_horizontal:n
 
-\prg_new_conditional:Npnn \__embrac_empty_or_no_value:n #1 { F,TF }
+\prg_new_conditional:Npnn \embrac_empty_or_no_value:n #1 { F,TF }
   {
     \IfNoValueTF { #1 } { \prg_return_true: }
       { \tl_if_blank:nTF { #1 } { \prg_return_true: } { \prg_return_false: } }
   }
+
+\cs_new:Npn \embrac_nobreak:
+  { \tex_penalty:D \c_ten_thousand }
 
 % --------------------------------------------------------------------------
 % THE MAIN PART:
@@ -115,27 +118,35 @@
 \prop_new:N \l__embrac_emph_cbrackets_after_prop
 
 % do the replacing:
-\cs_new_protected:Npn \__embrac_replace_brackets:N #1
+\cs_new_protected:Npn \embrac_replace_brackets:N #1
   {
     \prop_map_inline:Nn \l__embrac_emph_obrackets_prop
       {
         \tl_replace_all:Nnn #1 { ##1 }
           {
-            \__embrac_kern:n
-              { \prop_get:Nn \l__embrac_emph_obrackets_before_prop { ##1 } }
-            \embrac_braces_format:n { ##1 \__embrac_kern:n { ##2 } }
-            \nobreak
+            \mode_if_math:TF
+              { ##1 }
+              {
+                \embrac_kern:n
+                  { \prop_get:Nn \l__embrac_emph_obrackets_before_prop { ##1 } }
+                \embrac_braces_format:n { ##1 \embrac_kern:n { ##2 } }
+                \embrac_nobreak:
+              }
           }
       }
     \prop_map_inline:Nn \l__embrac_emph_cbrackets_prop
       {
         \tl_replace_all:Nnn #1 { ##1 }
           {
-            \nobreak
-            \embrac_braces_format:n
-              { \__embrac_kern:n { ##2 } ##1 }
-            \__embrac_kern:n
-              { \prop_get:Nn \l__embrac_emph_cbrackets_after_prop { ##1 } }
+            \mode_if_math:TF
+              { ##1 }
+              {
+                \embrac_nobreak:
+                \embrac_braces_format:n
+                  { \embrac_kern:n { ##2 } ##1 }
+                \embrac_kern:n
+                  { \prop_get:Nn \l__embrac_emph_cbrackets_after_prop { ##1 } }
+              }
           }
       }
   }
@@ -144,44 +155,44 @@
 \cs_new_protected:Npn \__embrac_emph:n #1
   {
     \tl_set:Nx \l__embrac_tmpa_tl { #1 }
-    \__embrac_replace_brackets:N \l__embrac_tmpa_tl
-    \__embrac_orig_emph:V \l__embrac_tmpa_tl
+    \embrac_replace_brackets:N \l__embrac_tmpa_tl
+    \embrac_orig_emph:V \l__embrac_tmpa_tl
   }
 
 % internal \textit command:
 \cs_new_protected:Npn \__embrac_textit:n #1
   {
     \tl_set:Nn \l__embrac_tmpa_tl { #1 }
-    \__embrac_replace_brackets:N \l__embrac_tmpa_tl
-    \__embrac_orig_textit:V \l__embrac_tmpa_tl
+    \embrac_replace_brackets:N \l__embrac_tmpa_tl
+    \embrac_orig_textit:V \l__embrac_tmpa_tl
   }
 
 % internal \textsi command:
 \AtBeginDocument{
-  \__embrac_if_fontspec:T
+  \embrac_if_fontspec:T
     {
       \cs_new_protected:Npn \__embrac_textsi:n #1
         {
           \tl_set:Nn \l__embrac_tmpa_tl { #1 }
-          \__embrac_replace_brackets:N \l__embrac_tmpa_tl
-          \__embrac_orig_textsi:V \l__embrac_tmpa_tl
+          \embrac_replace_brackets:N \l__embrac_tmpa_tl
+          \embrac_orig_textsi:V \l__embrac_tmpa_tl
         }
     }
   }
 
 % biblatex compatibility:
-\cs_new_protected:Npn \__embrac_treat_bibparens:
+\cs_new_protected:Npn \embrac_treat_bibparens:
   {
     \bool_if:NT \l__embrac_treat_biblatex_bool
       {
-        \__embrac_replace_brackets:N \bibleftbracket
-        \__embrac_replace_brackets:N \bibrightbracket
-        \__embrac_replace_brackets:N \bibleftparen
-        \__embrac_replace_brackets:N \bibrightparen
+        \embrac_replace_brackets:N \bibleftbracket
+        \embrac_replace_brackets:N \bibrightbracket
+        \embrac_replace_brackets:N \bibleftparen
+        \embrac_replace_brackets:N \bibrightparen
       }
   }
 
-\cs_new_protected:Npn \__embrac_treat_bibemph:
+\cs_new_protected:Npn \embrac_treat_bibemph:
   {
     \bool_if:NT \l__embrac_treat_biblatex_bool
       {
@@ -192,37 +203,37 @@
   }
 
 % internal \emph command, second layer:
-\cs_new_protected:Npn \__embrac_new_emph:nn #1#2
+\cs_new_protected:Npn \embrac_emph:nn #1#2
   {
     \group_begin:
-      \__embrac_treat_bibparens:
+      \embrac_treat_bibparens:
       \tl_if_eq:nnTF { #1 } { * }
-        { \__embrac_orig_emph:n { #2 } }
+        { \embrac_orig_emph:n { #2 } }
         { \__embrac_emph:n { #2 } }
     \group_end:
   }
 
 % internal \textit command, second layer:
-\cs_new_protected:Npn \__embrac_new_textit:nn #1#2
+\cs_new_protected:Npn \embrac_textit:nn #1#2
   {
     \group_begin:
-      \__embrac_treat_bibparens:
+      \embrac_treat_bibparens:
       \tl_if_eq:nnTF { #1 } { * }
-        { \__embrac_orig_textit:n { #2 } }
+        { \embrac_orig_textit:n { #2 } }
         { \__embrac_textit:n { #2 } }
     \group_end:
   }
 
 % internal \textsi command, second layer:
 \AtBeginDocument{
-  \__embrac_if_fontspec:T
+  \embrac_if_fontspec:T
     {
-      \cs_new_protected:Npn \__embrac_new_textsi:nn #1#2
+      \cs_new_protected:Npn \embrac_textsi:nn #1#2
         {
           \group_begin:
-          \__embrac_treat_bibparens:
+          \embrac_treat_bibparens:
             \tl_if_eq:nnTF { #1 } { * }
-              { \__embrac_orig_textsi:n { #2 } }
+              { \embrac_orig_textsi:n { #2 } }
               { \__embrac_textsi:n { #2 } }
           \group_end:
         }
@@ -233,27 +244,27 @@
 \RenewDocumentCommand \emph { sm }
   {
     \IfBooleanTF { #1 }
-      { \__embrac_new_emph:nn { * } { #2 } }
-      { \__embrac_new_emph:nn {   } { #2 } }
+      { \embrac_emph:nn { * } { #2 } }
+      { \embrac_emph:nn {   } { #2 } }
   }
 
 % user command \textit:
 \RenewDocumentCommand \textit { sm }
   {
     \IfBooleanTF { #1 }
-      { \__embrac_new_textit:nn { * } { #2 } }
-      { \__embrac_new_textit:nn {   } { #2 } }
+      { \embrac_textit:nn { * } { #2 } }
+      { \embrac_textit:nn {   } { #2 } }
   }
 
 % user command \textsi:
 \AtBeginDocument{
-  \__embrac_if_fontspec:T
+  \embrac_if_fontspec:T
     {
       \RenewDocumentCommand \textsi { sm }
         {
           \IfBooleanTF { #1 }
-            { \__embrac_new_textsi:nn { * } { #2 } }
-            { \__embrac_new_textsi:nn {   } { #2 } }
+            { \embrac_textsi:nn { * } { #2 } }
+            { \embrac_textsi:nn {   } { #2 } }
         }
     }
   }
@@ -264,13 +275,13 @@
 \NewDocumentCommand \EmbracOff {}
   {
     \RenewDocumentCommand \emph { sm }
-      { \__embrac_orig_emph:n { ##2 } }
+      { \embrac_orig_emph:n { ##2 } }
     \RenewDocumentCommand \textit { sm }
-      { \__embrac_orig_textit:n { ##2 } }
+      { \embrac_orig_textit:n { ##2 } }
     \cs_if_exist:NT \textsi
       {
         \RenewDocumentCommand \textsi { sm }
-          { \__embrac_orig_textsi:n { ##2 } }
+          { \embrac_orig_textsi:n { ##2 } }
       }
   }
 
@@ -280,22 +291,22 @@
     \RenewDocumentCommand \emph { sm }
       {
         \IfBooleanTF { ##1 }
-          { \__embrac_new_emph:nn { * } { ##2 } }
-          { \__embrac_new_emph:nn {   } { ##2 } }
+          { \embrac_emph:nn { * } { ##2 } }
+          { \embrac_emph:nn {   } { ##2 } }
       }
     \RenewDocumentCommand \textit { sm }
       {
         \IfBooleanTF { ##1 }
-          { \__embrac_new_textit:nn { * } { ##2 } }
-          { \__embrac_new_textit:nn {   } { ##2 } }
+          { \embrac_textit:nn { * } { ##2 } }
+          { \embrac_textit:nn {   } { ##2 } }
       }
     \cs_if_exist:NT \textsi
       {
         \RenewDocumentCommand \textsi { sm }
           {
             \IfBooleanTF { ##1 }
-              { \__embrac_new_textsi:nn { * } { ##2 } }
-              { \__embrac_new_textsi:nn {   } { ##2 } }
+              { \embrac_textsi:nn { * } { ##2 } }
+              { \embrac_textsi:nn {   } { ##2 } }
           }
       }
   }
@@ -305,20 +316,20 @@
 % internal add commands:
 \cs_new_protected:Npn \embrac_add_op_to_emph:nnn #1#2#3
   {
-    \__embrac_empty_or_no_value:nTF { #2 }
+    \embrac_empty_or_no_value:nTF { #2 }
       { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_prop { #1 } { 0pt } }
       { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_prop { #1 } { #2 } }
-    \__embrac_empty_or_no_value:nTF { #3 }
+    \embrac_empty_or_no_value:nTF { #3 }
       { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_before_prop { #1 } { 0pt } }
       { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_before_prop { #1 } { #3 } }
   }
 
 \cs_new_protected:Npn \embrac_add_cl_to_emph:nnn #1#2#3
   {
-    \__embrac_empty_or_no_value:nTF { #2 }
+    \embrac_empty_or_no_value:nTF { #2 }
       { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_prop { #1 } { 0pt } }
       { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_prop { #1 } { #2 } }
-    \__embrac_empty_or_no_value:nTF { #3 }
+    \embrac_empty_or_no_value:nTF { #3 }
       { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_after_prop { #1 } { 0pt } }
       { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_after_prop { #1 } { #3 } }
   }
@@ -351,20 +362,20 @@
 % internal renew commands:
 \cs_new_protected:Npn \embrac_renew_op_emph:nnn #1#2#3
   {
-    \__embrac_empty_or_no_value:nTF { #2 }
+    \embrac_empty_or_no_value:nTF { #2 }
       { \prop_put:Nnn \l__embrac_emph_obrackets_prop { #1 } { 0pt } }
       { \prop_put:Nnn \l__embrac_emph_obrackets_prop { #1 } { #2 } }
-    \__embrac_empty_or_no_value:nTF { #3 }
+    \embrac_empty_or_no_value:nTF { #3 }
       { \prop_put:Nnn \l__embrac_emph_obrackets_before_prop { #1 } { 0pt } }
       { \prop_put:Nnn \l__embrac_emph_obrackets_before_prop { #1 } { #3 } }
   }
 
 \cs_new_protected:Npn \embrac_renew_cl_emph:nnn #1#2#3
   {
-    \__embrac_empty_or_no_value:nTF { #2 }
+    \embrac_empty_or_no_value:nTF { #2 }
       { \prop_put:Nnn \l__embrac_emph_cbrackets_prop { #1 } { 0pt } }
       { \prop_put:Nnn \l__embrac_emph_cbrackets_prop { #1 } { #2 } }
-    \__embrac_empty_or_no_value:nTF { #3 }
+    \embrac_empty_or_no_value:nTF { #3 }
       { \prop_put:Nnn \l__embrac_emph_cbrackets_after_prop { #1 } { 0pt } }
       { \prop_put:Nnn \l__embrac_emph_cbrackets_after_prop { #1 } { #3 } }
   }
@@ -380,9 +391,9 @@
   {
     \prop_if_in:NnT \l__embrac_emph_obrackets_prop { #1 }
       {
-        \__embrac_empty_or_no_value:nF { #2 }
+        \embrac_empty_or_no_value:nF { #2 }
           { \prop_put:Nnn \l__embrac_emph_obrackets_prop { #1 } { #2 } }
-        \__embrac_empty_or_no_value:nF { #3 }
+        \embrac_empty_or_no_value:nF { #3 }
           { \prop_put:Nnn \l__embrac_emph_obrackets_before_prop { #1 } { #3 } }
       }
   }
@@ -391,9 +402,9 @@
   {
     \prop_if_in:NnT \l__embrac_emph_cbrackets_prop { #1 }
       {
-        \__embrac_empty_or_no_value:nF { #2 }
+        \embrac_empty_or_no_value:nF { #2 }
           { \prop_put:Nnn \l__embrac_emph_cbrackets_prop { #1 } { #2 } }
-        \__embrac_empty_or_no_value:nF { #3 }
+        \embrac_empty_or_no_value:nF { #3 }
           { \prop_put:Nnn \l__embrac_emph_cbrackets_after_prop { #1 } { #3 } }
       }
   }
@@ -503,7 +514,7 @@
 
 \ProcessKeysOptions { embrac }
 
-\AtBeginDocument { \__embrac_treat_bibemph: }
+\AtBeginDocument { \embrac_treat_bibemph: }
 
 \tex_endinput:D
 
@@ -520,3 +531,5 @@
 2013/05/13 - v0.4  - added versions of \AddEmph, \RenewEmph, \DeleteEmph and
                      \ChangeEmph that allow setting opening or closing parts
                      separately
+2014/05/07 - v0.5  - renaming of some internal commands
+                   - leave brackets unchanged if in math mode

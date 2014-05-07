@@ -26,58 +26,28 @@
 % 
 % The Current Maintainer of this work is Clemens Niederberger.
 % --------------------------------------------------------------------------
-% The embrac package consists of the files
-%  - embrac.sty, embrac_en.tex, embrac_en.pdf, embrac_kerning_test.tex and
-%    README
-% --------------------------------------------------------------------------
-% If you have any ideas, questions, suggestions or bugs to report, please
-% feel free to contact me.
-% --------------------------------------------------------------------------
-%
-% if you want to compile this documentation you'll need the document class
-% `cnpkgdoc' which you can get here:
-%    https://bitbucket.org/cgnieder/cnpkgdoc/
-% the class is licensed LPPL 1.3 or later
-%
-\documentclass[DIV10,toc=index,toc=bib]{cnpkgdoc}
-\docsetup{
-  pkg      = [biblatex]embrac,
-  language = en ,
-  code-box = {
-    backgroundcolor  = gray!7!white ,
-    skipbelow        = .6\baselineskip plus .5ex minus .5ex ,
-    skipabove        = .6\baselineskip plus .5ex minus .5ex ,
-    roundcorner      = 3pt ,
-  } ,
-  gobble   = 1
+\documentclass[load-preamble+]{cnltx-doc}
+\usepackage[utf8]{inputenc}
+\usepackage[biblatex]{embrac}
+
+\setcnltx{
+  package = embrac ,
+  authors = Clemens Niederberger ,
+  email   = contact@mychemistry.eu ,
+  url     = https://bitbucket.org/cgnieder/embrac/ ,
+  quote-author-format = ,
+  add-cmds = {
+    AddEmph,
+    ChangeEmph,
+    DeleteEmph,
+    EmbracOff,
+    EmbracOn,
+    printbibliography,
+    RenewEmph
+  }
 }
 
-\usepackage{libertinehologopatch}
-\usepackage{fnpct,ragged2e}
-\cnpkgusecolorscheme{friendly}
-\renewcommand*\othersectionlevelsformat[3]{%
-  \textcolor{main}{#3\autodot}\enskip}
-\renewcommand*\partformat{%
-  \textcolor{main}{\partname~\thepart\autodot}}
-
-\newcommand*\Default[1]{%
-  \hfill\llap{%
-    \ifblank{#1}
-      {(initially~empty)}
-      {Default:~\code{#1}}%
-    }\newline
-}
-
-\addcmds{
-  AddEmph,
-  DeleteEmph,
-  EmbracOff,
-  EmbracOn,
-  printbibliography,
-  ChangeEmph
-}
-
-\usepackage[backend=biber,style=alphabetic]{biblatex}
+\usepackage{csquotes}
 \addbibresource{\jobname.bib}
 \usepackage{filecontents}
 \begin{filecontents}{\jobname.bib}
@@ -106,56 +76,19 @@
 }
 \end{filecontents}
 
-% index:
-\usepackage{imakeidx}
-\begin{filecontents*}{\jobname.ist}
- heading_prefix "{\\bfseries "
- heading_suffix "\\hfil}\\nopagebreak\n"
- headings_flag  1
- delim_0 "\\dotfill\\hyperpage{"
- delim_1 "\\dotfill\\hyperpage{"
- delim_2 "\\dotfill\\hyperpage{"
- delim_r "}\\textendash\\hyperpage{"
- delim_t "}"
- suffix_2p "\\nohyperpage{\\,f.}"
- suffix_3p "\\nohyperpage{\\,ff.}"
-\end{filecontents*}
-\indexsetup{noclearpage,othercode=\footnotesize}
-\makeindex[options={-s \jobname.ist},intoc,columns=3]
-
 \usepackage{fixfoot}
 \DeclareFixedFootnote\manythanks{Many thanks again for his kind permission to use it!}
 
 \RenewEmph{[}[-0.045em,.02em]{]}[.055em,-.09em]
 \ChangeEmph{(}[-.01em,.04em]{)}[.04em,-.05em]
 
-\usepackage{marginnote}
-\makeatletter
-\providecommand*\sinceversion[1]{%
-  \@bsphack
-  \marginnote{%
-    \footnotesize\sffamily\RaggedRight
-    \textcolor{black!75}{Introduced in version~#1}}%
-  \@esphack}
-\providecommand*\changedversion[1]{%
-  \@bsphack
-  \marginnote{%
-    \footnotesize\sffamily\RaggedRight
-    \textcolor{black!75}{Changed in version~#1}}%
-  \@esphack}
-\makeatother
-
 \begin{document}
 
-\section{License and Requirements}\secidx{License}\secidx{Requirements}
-\embrac is placed under the terms of the LaTeX Project Public License,
-version 1.3 or later (\url{http://www.latex-project.org/lppl.txt}).
-It has the status ``maintained.''
+\section{License and Requirements}
+\license
 
-\embrac loads and needs the packages \paket{expl3}, \paket{xparse} and
-\paket{l3keys2e}, the first is part of the \paket{l3kernel} and the others are
-part of the \paket{l3packages}.
-\secidx*{License}\secidx*{Requirements}
+\embrac\ needs the the \bnd{l3kernel}~\cite{bnd:l3kernel} and
+\bnd{l3packages}~\cite{bnd:l3packages}.
 
 \section{Acknowledgements}
 I like to thank both Dominik Waßenhoven for inspiration~\cite{dtk12-dw} and
@@ -164,14 +97,15 @@ package probably wouldn't exist.
 
 \section{New}
 \begin{description}
- \item[v0.1a] The command \cmd{RenewEmph} has been renamed into
-   \cmd{ChangeEmph} and a new slightly different \cmd{RenewEmph} has been added.
- \item[v0.2] Improved interaction with \paket{biblatex}.
- \item[v0.3] Added support for \paket*{fontspec}'s \cmd{textsi}.
+ \item[v0.1a] The command \cs{RenewEmph} has been renamed into
+   \cs{ChangeEmph} and a new slightly different \cs{RenewEmph} has been added.
+ \item[v0.2] Improved interaction with \pkg{biblatex}.
+ \item[v0.3] Added support for \pkg*{fontspec}'s \cs{textsi}.
+ \item[v0.5] Don't replace brackets in math mode.
 \end{description}
 
-\section{About}\label{sec:about}\secidx{About}
-\begin{zitat}[{{\cite[85]{bringhurst04}}}]
+\section{About}\label{sec:about}
+\begin{cnltxquote}[{\cite[85]{bringhurst04}}]
   Parentheses and brackets are not letters, and it makes little sense to speak
   of them as roman or italic.  There are vertical parentheses and sloped ones,
   and the parentheses on italic fonts are almost always sloped, but vertical
@@ -187,7 +121,7 @@ package probably wouldn't exist.
   should be used, no matter whether the text is roman or italic:
   \textquote{The View from My \emph{[sic]} Bed} and \textquote{\emph{the view
       from my [sic] bed}.\kern.05em}
-\end{zitat}
+\end{cnltxquote}
 
 \noindent
 Both this quote from~\citetitle{bringhurst04} by Robert Bringhurst and the
@@ -197,203 +131,208 @@ this package.  Indeed, \embrac heavily borrows from the code
 originally provided by Bruno Le~Floch\manythanks\ answering a question on
 \href{http://tex.stackexchange.com}{TeX.sx}~\cite{lefloch11}.
 
-\embrac tries to redefine \cmd{emph} and \cmd{textit} in a way that neither
+\embrac\ tries to redefine \cs{emph} and \cs{textit} in a way that neither
 parentheses nor square brackets are sloped.  In an ideal world you of course
 wouldn't need this package because the italic font you're using would have
 vertical parentheses and brackets by itself.
 
-\begin{beispiel}
- \emph{This is emphasized [sic] text.} \\
- \emph{This is emphasized text (as you can see).}
-\end{beispiel}
-\secidx*{About}
+\begin{example}
+  \emph{This is emphasized [sic] text.} \par
+  \emph{This is emphasized text (as you can see).}
+\end{example}
 
-\section{How it Works}\secidx{How it Works}
-Both the commands \cmd{emph} and \cmd{textit} are redefined:
-\begin{beschreibung}
- \Befehl{emph}*{<emphasized text>}
- \Befehl{textit}*{<text in italics>}
- \Befehl{textsi}*{<text in italic small caps>}\newline
-   This command is only defined and thus redefined if you loaded \paket{fontspec},
-   \emph{i.e.} if you're compiling your document with \XeLaTeX{} or \LuaLaTeX.
-\end{beschreibung}
-They now have a \code{*} argument that restores the original behaviour.
+\section{How it Works}
+Both the commands \cs{emph} and \cs{textit} are redefined:
+\begin{commands}
+  \command{emph}[\sarg\marg{emphasized text}]
+    Emphasizing text.
+  \command{textit}[\sarg\marg{text in italics}]
+    Italicizing text,
+  \command{textsi}[\sarg\marg{text in italic small caps}]
+    This command is only defined and thus redefined if you loaded
+    \pkg{fontspec}, \ie, if you're compiling your document with \XeLaTeX{} or
+    \LuaLaTeX.
+\end{commands}
+They now have a \sarg\ argument that restores the original behaviour.
 Otherwise they're used just as before.
 
 Let's see the example again:
-\begin{beispiel}
- \emph{This is emphasized [sic] text.} \\
- \emph{This is emphasized text (as you can see).}
-\end{beispiel}
-As you can see you don't have to do anything apart from loading \embrac in
+\begin{example}
+  \emph{This is emphasized [sic] text.} \par
+  \emph{This is emphasized text (as you can see).}
+\end{example}
+As you can see you don't have to do anything apart from loading \embrac\ in
 your preamble.  Well -- that's actually not entirely true.  You have to take
 care of the kerning of the parentheses and brackets.  Otherwise things could
-look worse with \embrac than without.
+look worse with \embrac\ than without.
 
 The following example demonstrates one point why you have to be very careful
 when using \embrac.  Certain parenthesis-letter combinations might need
 adjustments of the kerning:
-\begin{beispiel}
- \emph{This is (just) emphasized text.} \\
- \emph{This is (\kern.1em just) emphasized text.}
-\end{beispiel}
+\begin{example}
+  \emph{This is (just) emphasized text.} \par
+  \emph{This is (\kern.1em just) emphasized text.}
+\end{example}
 This of course strongly depends on the font you've chosen.  Kerning is a very
 important aspect when using this package and you shouldn't use it without
 giving it a certain amount of attention.  See the next section for more
-details.  \secidx*{How it Works}
+details.
 
 \section{Adding More Brackets \&\ Adjusting the Kerning}
-\secidx{Adding More Brackets}\secidx{Adjusting the Kerning} If you want you
-can change the behaviour of \embrac.  Maybe it should only affect squared
-brackets?  Or curly braces, too?  This can be done with the following
-commands.  They all work locally which means if used inside a group outside of
-it everything stays what it was.
-\begin{beschreibung}
- \Befehl{AddEmph}{<o>}\oa{<io-kern>,<oo-kern>}\ma{<c>}\oa{<ic-kern>,<oc-kern>}
- \Befehl{ChangeEmph}{<o>}\oa{<io-kern>,<oo-kern>}\ma{<c>}\oa{<ic-kern>,<oc-kern>}
- \Befehl{RenewEmph}{<o>}\oa{<io-kern>,<oo-kern>}\ma{<c>}\oa{<ic-kern>,<oc-kern>}
- \Befehl{DeleteEmph}{<o>}\ma{<c>}
-\end{beschreibung}
-Here \code{<o>} means \emph{opening bracket} and \code{<c>} means
-\emph{closing bracket}.  The kerning arguments are all four optional and
-require -- if given -- to be a length.  If they're not given \cmd{AddEmph} and
-\cmd{RenewEmph} insert \code{0pt} and \cmd{ChangeEmph} uses the value stored
-by \cmd{AddEmph} or \cmd{RenewEmph} before.
+If you want you can change the behaviour of \embrac.  Maybe it should only
+affect squared brackets?  Or curly braces, too?  This can be done with the
+following commands.  They all work locally which means if used inside a group
+outside of it everything stays what it was.
+\begin{commands}
+  \command{AddEmph}[\marg{o}\Oarg{\meta{io-kern},\meta{oo-kern}}%
+    \marg{c}\Oarg{\meta{ic-kern},\meta{oc-kern}}]
+    Add a pair of brackets to be left upright in italic text.
+  \command{ChangeEmph}[\marg{o}\Oarg{\meta{io-kern},\meta{oo-kern}}%
+    \marg{c}\Oarg{\meta{ic-kern},\meta{oc-kern}}]
+    Change the kerning values for a given pair of brackets.
+  \command{RenewEmph}[\marg{o}\Oarg{\meta{io-kern},\meta{oo-kern}}%
+    \marg{c}\Oarg{\meta{ic-kern},\meta{oc-kern}}]
+    Renew the kerning values for a given pair of brackets.  See below for the
+    difference to \cs{ChangeEmph}.
+  \command{DeleteEmph}[\marg{o}\marg{c}]
+    Remove a pair of brackets from treatment.
+\end{commands}
+In the above descriptions \meta{o} means \emph{opening bracket} and \meta{c}
+means \emph{closing bracket}.  The kerning arguments are all four optional and
+require -- if given -- to be a length.  If they're not given \cs{AddEmph} and
+\cs{RenewEmph} insert \code{0pt} and \cs{ChangeEmph} uses the value stored by
+\cs{AddEmph} or \cs{RenewEmph} before.
 
 \sinceversion{0.4}To each of these commands there are two variants that are
 only semantically different\footnote{They're also using different lists
   internally but you shouldn't concern yourself with this.}.  They are all
-called \cmd*{<base>OpEmph} or \cmd*{<base>ClEmph} where \code{<base>} is
+called \cs*{\meta{base}OpEmph} or \cs*{\meta{base}ClEmph} where \meta{base} is
 either \code{Add}, \code{Change}, \code{Renew} or \code{Delete}.  Their
 arguments are all the same: the half of what the main commands have for either
 modifying the opening or the closing symbols.
-\begin{beschreibung}
- \Befehl{AddOpEmph}{<o>}\oa{<io-kern>,<oo-kern>}
- \Befehl{AddClEmph}{<c>}\oa{<ic-kern>,<oc-kern>}
-\end{beschreibung}
+\begin{commands}
+  \command{AddOpEmph}[\marg{o}\Oarg{\meta{io-kern},\meta{oo-kern}}]
+    An an opening bracket to the treatment.
+  \command{AddClEmph}[\marg{c}\Oarg{\meta{ic-kern},\meta{oc-kern}}]
+    An a closing bracket to the treatment.
+\end{commands}
 They allow you to add single symbols to \embrac's mechanism instead of adding
 pairs.
 
-In all these commands the optional argument \code{<io-kern>} is inserted after
-the opening bracket (inner opening), \code{<oo-kern>} is inserted before it
-(outer opening). \code{<ic-kern>} is inserted before the closing bracket
-(inner closing), \code{<oc-kern>} after it (outer closing).
+In all these commands the optional argument \meta{io-kern} is inserted after
+the opening bracket (inner opening), \meta{oo-kern} is inserted before it
+(outer opening). \meta{ic-kern} is inserted before the closing bracket (inner
+closing), \meta{oc-kern} after it (outer closing).
 
-\embrac initially makes these definitions:
-\begin{beispiel}[code only]
- % add some defaults:
- \AddEmph{[}{]}[.04em,-.12em]
- \AddEmph{(}[-.04em]{)}[,-.15em]
-\end{beispiel}
+\embrac\ initially makes these definitions:
+\begin{sourcecode}
+  % add some defaults:
+  \AddEmph{[}{]}[.04em,-.12em]
+  \AddEmph{(}[-.04em]{)}[,-.15em]
+\end{sourcecode}
 
 This document however uses ``Linux Libertine
 O''\footnote{\url{http://www.linuxlibertine.org/}} both for the roman and the
 italic font and redefines them in this way (still not sure these are the best
 values):
-\begin{beispiel}[code only]
- \RenewEmph{[}[-0.045em,.02em]{]}[.055em,-.09em]
- \ChangeEmph{(}[-.01em,.04em]{)}[.04em,-.05em]
-\end{beispiel}
+\begin{sourcecode}
+  \RenewEmph{[}[-0.045em,.02em]{]}[.055em,-.09em]
+  \ChangeEmph{(}[-.01em,.04em]{)}[.04em,-.05em]
+\end{sourcecode}
 
 You can change them as you wish, but be careful with the kerning! What's too
 less for one letter might be too much for others:
-\begin{beispiel}
- \ChangeEmph{(}[.1em]{)}[.1em]
- \emph{This is (just) emphasized text.} \\ % looks ok
- \emph{This is emphasized text (as you can see).} % looks bad
-\end{beispiel}
+\begin{example}
+  \ChangeEmph{(}[.1em]{)}[.1em]
+  \emph{This is (just) emphasized text.} \par % looks OK, kind of
+  \emph{This is emphasized text (as you can see).} % looks bad
+\end{example}
 
 To see why it is important to pay attention to the kerning values let's look
 at how \embrac's features look without kerning (\ie, \code{0pt} for each
 value), with the default settings and with the settings for this document:
 
 \begin{center}
- \begin{minipage}{.5\linewidth}
-  \textbf{No Kerning:}
+  \begin{minipage}{.5\linewidth}
+    \textbf{No Kerning:}
   
-  \RenewEmph{[}{]}\RenewEmph{(}{)}
-  \emph{This is emphasized [sic] text.} \\
-  \emph{This is emphasized text [as you can see].} \\
-  \emph{This is emphasized (sic) text.} \\
-  \emph{This is emphasized text (as you can see).}
- \end{minipage}\bigskip
+    \RenewEmph{[}{]}\RenewEmph{(}{)}
+    \emph{This is emphasized [sic] text.} \\
+    \emph{This is emphasized text [as you can see].} \\
+    \emph{This is emphasized (sic) text.} \\
+    \emph{This is emphasized text (as you can see).}
+  \end{minipage}\bigskip
  
- \begin{minipage}{.5\linewidth}
-  \textbf{\embrac's Default Kerning:}
+  \begin{minipage}{.5\linewidth}
+    \textbf{\embrac's Default Kerning:}
   
-  \RenewEmph{[}{]}[.04em,-.12em]\RenewEmph{(}[-.04em]{)}[,-.15em]
-  \emph{This is emphasized [sic] text.} \\
-  \emph{This is emphasized text [as you can see].} \\
-  \emph{This is emphasized (sic) text.} \\
-  \emph{This is emphasized text (as you can see).}
- \end{minipage}\bigskip
+    \RenewEmph{[}{]}[.04em,-.12em]\RenewEmph{(}[-.04em]{)}[,-.15em]
+    \emph{This is emphasized [sic] text.} \\
+    \emph{This is emphasized text [as you can see].} \\
+    \emph{This is emphasized (sic) text.} \\
+    \emph{This is emphasized text (as you can see).}
+  \end{minipage}\bigskip
  
- \begin{minipage}{.5\linewidth}
-  \textbf{Adjusted Kerning:}
+  \begin{minipage}{.5\linewidth}
+    \textbf{Adjusted Kerning:}
   
-  \emph{This is emphasized [sic] text.} \\
-  \emph{This is emphasized text [as you can see].} \\
-  \emph{This is emphasized (sic) text.} \\
-  \emph{This is emphasized text (as you can see).}
- \end{minipage}
+    \emph{This is emphasized [sic] text.} \\
+    \emph{This is emphasized text [as you can see].} \\
+    \emph{This is emphasized (sic) text.} \\
+    \emph{This is emphasized text (as you can see).}
+  \end{minipage}
 \end{center}
 
 Deleting a pair removes it completely from \embrac's mechanism.  All
 information about the pair and its kerning values will be lost.  So if you
 want the effects to be temporary use grouping.
-\begin{beispiel}
- \DeleteEmph{[}{]}
- \emph{This is emphasized [sic] text.} \\
- \emph{This is emphasized text (as you can see).}
-\end{beispiel}
+\begin{example}
+  \DeleteEmph{[}{]}
+  \emph{This is emphasized [sic] text.} \par
+  \emph{This is emphasized text (as you can see).}
+\end{example}
 
 By the way: this packages provides a simple file
 \code{embrac\_kerning\_test.tex} for testing kerning values.  You should find
-it in the same directory as this documentation.  \secidx*{Adding More
-  Brackets}\secidx*{Adjusting the Kerning}
+it in the same directory as this documentation.
 
-\section{biblatex Compatibility}\secidx{biblatex Compatibility}
+
+\section{biblatex Compatibility}
 This is \embrac's only package option:
-\begin{beschreibung}
-  \Option{biblatex}{\default{true}|on|parens|false|off|none}\Default{false} If
-    set to \code{true} (or one of its aliases) parentheses and squared brackets
-    as defined by \paket{biblatex} with \cmd{bibleftparen}, \cmd{bibrightparen},
-    \cmd{bibleftbracket} and \cmd{bibrightbracket} are treated the same way (if
-    not removed from the treatment with \cmd{DeleteEmph}).
+\begin{options}
+  \keychoice{biblatex}{\default{true},on,parens,false,off,none}\Default{false}
+    If set to \code{true} (or one of its aliases) parentheses and squared
+    brackets as defined by \pkg{biblatex} with \cs{bibleftparen},
+    \cs{bibrightparen}, \cs{bibleftbracket} and \cs{bibrightbracket} are
+    treated the same way (if not removed from the treatment with \cs{DeleteEmph}).
    
-    The command \cmd{blx@imc@mkbibemph} is patched to use the original definition
-    of \cmd{emph}.
-\end{beschreibung}
+    The command \cs*{blx@imc@mkbibemph} is patched to use the original definition
+    of \cs{emph}.
+\end{options}
 
-\begin{beispiel}
- % this document uses \usepackage[biblatex]{embrac}
- \emph{Let's cite Bringhurst again:~\cite{bringhurst04}}.
-\end{beispiel}
-\secidx*{biblatex Compatibility}
+\begin{example}
+  % this document uses \usepackage[biblatex]{embrac}
+  \emph{Let's cite Bringhurst again:~\cite{bringhurst04}}.
+\end{example}
 
-\section{Turn \embrac Temporarily Off}\secidx{Turn \embrac Temporarily Off}
-Redefining \cmd{emph} and \cmd{textit} is not without danger.  Sometimes you
+\section{Turn \embrac Temporarily Off}
+Redefining \cs{emph} and \cs{textit} is not without danger.  Sometimes you
 might find that you'd want to keep the original definition for a small portion
 of your document.  You can use the following commands whose functions are
 obvious, I guess:
-\begin{beschreibung}
- \Befehl{EmbracOff}
- \Befehl{EmbracOn}
-\end{beschreibung}
+\begin{commands}
+  \command{EmbracOff}
+    Turn \embrac's treatment off.
+  \command{EmbracOn}
+    Turn \embrac's treatment on.
+\end{commands}
 Both commands are local.
-\secidx*{Turn \embrac Temporarily Off}
 
-\section{Watch out!}\secidx{Watch Out}
-Please be aware that \embrac does not affect \cmd{itshape} nor \cmd{em} (nor
-\cmd{it} which you shouldn't use in a \LaTeX{} document, anyway).
-\begin{beispiel}
- \itshape This is italic [sic] text.
-\end{beispiel}
-\secidx*{Watch Out}
+\section{Watch out!}
+Please be aware that \embrac does not affect \cs{itshape} nor \cs{em} (nor
+\cs{it} which you shouldn't use in a \LaTeX{} document, anyway).
+\begin{example}
+  \itshape This is italic [sic] text.
+\end{example}
 
-\printbibliography
-
-\indexprologue{\noindent Section titles are indicated \textbf{bold}, packages
-\textsf{sans serif}, commands \cmd*{brown} and options \key*{yellow}.}
-\printindex
 \end{document}
