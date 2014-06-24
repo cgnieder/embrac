@@ -146,12 +146,14 @@ parentheses and brackets by itself.
 \end{example}
 
 \section{How it Works}
-Both the commands \cs{emph} and \cs{textit} are redefined:
+The commands \cs{emph}, \cs{textit} and \cs{textsl} are redefined:
 \begin{commands}
   \command{emph}[\sarg\marg{emphasized text}]
     Emphasizing text.
   \command{textit}[\sarg\marg{text in italics}]
     Italicizing text,
+  \command{textsl}[\sarg\marg{slanted text}]
+    Slanting text,
   \command{textsi}[\sarg\marg{text in italic small caps}]
     This command is only defined and thus redefined if you loaded
     \pkg{fontspec}, \ie, if you're compiling your document with \XeLaTeX{} or
@@ -320,10 +322,10 @@ This is \embrac's only package option:
 \end{example}
 
 \section{Turn \embrac Temporarily Off}
-Redefining \cs{emph} and \cs{textit} is not without danger.  Sometimes you
-might find that you'd want to keep the original definition for a small portion
-of your document.  You can use the following commands whose functions are
-obvious, I guess:
+Redefining \cs{emph}, \cs{textit} and \cs{textsl} is not without danger.
+Sometimes you might find that you'd want to keep the original definition for a
+small portion of your document.  You can use the following commands whose
+functions are obvious, I guess:
 \begin{commands}
   \command{EmbracOff}
     Turn \embrac's treatment off.
