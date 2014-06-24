@@ -307,6 +307,8 @@
       { \embrac_orig_emph:n { ##2 } }
     \RenewDocumentCommand \textit { sm }
       { \embrac_orig_textit:n { ##2 } }
+    \RenewDocumentCommand \textsl { sm }
+      { \embrac_orig_textsl:n { ##2 } }
     \cs_if_exist:NT \textsi
       {
         \RenewDocumentCommand \textsi { sm }
@@ -328,6 +330,12 @@
         \IfBooleanTF { ##1 }
           { \embrac_textit:nn { * } { ##2 } }
           { \embrac_textit:nn {   } { ##2 } }
+      }
+    \RenewDocumentCommand \textsl { sm }
+      {
+        \IfBooleanTF { ##1 }
+          { \embrac_textsl:nn { * } { ##2 } }
+          { \embrac_textsl:nn {   } { ##2 } }
       }
     \cs_if_exist:NT \textsi
       {
