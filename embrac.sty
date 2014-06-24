@@ -169,7 +169,7 @@
     \embrac_orig_textit:V \l__embrac_tmpa_tl
   }
 
-% internal \textit command:
+% internal \textsl command:
 \cs_new_protected:Npn \__embrac_textsl:n #1
   {
     \tl_set:Nn \l__embrac_tmpa_tl { #1 }
@@ -277,7 +277,7 @@
       { \embrac_textit:nn {   } { #2 } }
   }
 
-% user command \textit:
+% user command \textsl:
 \RenewDocumentCommand \textsl { sm }
   {
     \IfBooleanTF { #1 }
