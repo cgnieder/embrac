@@ -82,6 +82,8 @@
 \RenewEmph{[}[-0.045em,.02em]{]}[.055em,-.09em]
 \ChangeEmph{(}[-.01em,.04em]{)}[.04em,-.05em]
 
+\newnote*\added[2]{Version~#1: added #2}
+
 \begin{document}
 
 \section{License and Requirements}
@@ -131,10 +133,11 @@ this package.  Indeed, \embrac\ heavily borrows from the code
 originally provided by Bruno Le~Floch\manythanks\ answering a question on
 \href{http://tex.stackexchange.com}{TeX.sx}~\cite{lefloch11}.
 
-\embrac\ tries to redefine \cs{emph} and \cs{textit} in a way that neither
-parentheses nor square brackets are sloped.  In an ideal world you of course
-wouldn't need this package because the italic font you're using would have
-vertical parentheses and brackets by itself.
+\embrac\ tries to redefine \cs{emph}, \cs{textit} and
+\cs{textsl}\added{0.6}{\cs{textsl}} in a way that neither parentheses nor
+square brackets are sloped.  In an ideal world you of course wouldn't need
+this package because the italic font you're using would have vertical
+parentheses and brackets by itself.
 
 \begin{example}
   \emph{This is emphasized [sic] text.} \par
