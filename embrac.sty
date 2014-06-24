@@ -34,8 +34,8 @@
 \RequirePackage { expl3 , xparse , l3keys2e }
 \ProvidesExplPackage
   {embrac}
-  {2014/05/07}
-  {0.5}
+  {2014/06/24}
+  {0.6}
   {Upright Brackets in Emphasized Text}
 
 % --------------------------------------------------------------------------
@@ -89,6 +89,8 @@
   \cs_generate_variant:Nn \embrac_orig_emph:n { V }
   \cs_new_eq:Nc \embrac_orig_textit:n { textit~ }
   \cs_generate_variant:Nn \embrac_orig_textit:n { V }
+  \cs_new_eq:Nc \embrac_orig_textsl:n { textsl~ }
+  \cs_generate_variant:Nn \embrac_orig_textsl:n { V }
   \embrac_if_fontspec:T
     {
       \cs_new_eq:Nc \embrac_orig_textsi:n { textsi~ }
@@ -167,6 +169,14 @@
     \embrac_orig_textit:V \l__embrac_tmpa_tl
   }
 
+% internal \textit command:
+\cs_new_protected:Npn \__embrac_textsl:n #1
+  {
+    \tl_set:Nn \l__embrac_tmpa_tl { #1 }
+    \embrac_replace_brackets:N \l__embrac_tmpa_tl
+    \embrac_orig_textsl:V \l__embrac_tmpa_tl
+  }
+
 % internal \textsi command:
 \AtBeginDocument{
   \embrac_if_fontspec:T
@@ -224,6 +234,17 @@
     \group_end:
   }
 
+% internal \textsl command, second layer:
+\cs_new_protected:Npn \embrac_textsl:nn #1#2
+  {
+    \group_begin:
+      \embrac_treat_bibparens:
+      \tl_if_eq:nnTF { #1 } { * }
+        { \embrac_orig_textsl:n { #2 } }
+        { \__embrac_textsl:n { #2 } }
+    \group_end:
+  }
+
 % internal \textsi command, second layer:
 \AtBeginDocument{
   \embrac_if_fontspec:T
@@ -254,6 +275,14 @@
     \IfBooleanTF { #1 }
       { \embrac_textit:nn { * } { #2 } }
       { \embrac_textit:nn {   } { #2 } }
+  }
+
+% user command \textit:
+\RenewDocumentCommand \textsl { sm }
+  {
+    \IfBooleanTF { #1 }
+      { \embrac_textsl:nn { * } { #2 } }
+      { \embrac_textsl:nn {   } { #2 } }
   }
 
 % user command \textsi:
@@ -533,3 +562,4 @@
                      separately
 2014/05/07 - v0.5  - renaming of some internal commands
                    - leave brackets unchanged if in math mode
+2014/06/24 - v0.6  - ass support for \textsl
