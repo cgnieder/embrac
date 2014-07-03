@@ -34,8 +34,8 @@
 \RequirePackage { expl3 , xparse , l3keys2e }
 \ProvidesExplPackage
   {embrac}
-  {2014/06/24}
-  {0.6}
+  {2014/07/03}
+  {0.6a}
   {Upright Brackets in Emphasized Text}
 
 % --------------------------------------------------------------------------
@@ -156,7 +156,7 @@
 % internal \emph command:
 \cs_new_protected:Npn \__embrac_emph:n #1
   {
-    \tl_set:Nx \l__embrac_tmpa_tl { #1 }
+    \tl_set:Nn \l__embrac_tmpa_tl { #1 }
     \embrac_replace_brackets:N \l__embrac_tmpa_tl
     \embrac_orig_emph:V \l__embrac_tmpa_tl
   }
@@ -571,3 +571,5 @@
 2014/05/07 - v0.5  - renaming of some internal commands
                    - leave brackets unchanged if in math mode
 2014/06/24 - v0.6  - add support for \textsl
+2014/07/03 - v0.6a - bugfix: remove unwanted (and unnecessary) expansion in
+                     \__embrac_emph:n
