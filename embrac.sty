@@ -8,7 +8,7 @@
 % Web:    https://bitbucket.org/cgnieder/embrac/
 % E-Mail: contact@mychemistry.eu
 % --------------------------------------------------------------------------
-% Copyright 2012--2014 Clemens Niederberger
+% Copyright 2012--2015 Clemens Niederberger
 % 
 % This work may be distributed and/or modified under the
 % conditions of the LaTeX Project Public License, either version 1.3
@@ -34,16 +34,16 @@
 \RequirePackage { expl3 , xparse , l3keys2e }
 \ProvidesExplPackage
   {embrac}
-  {2014/07/03}
-  {0.6a}
+  {2015/09/06}
+  {0.6b}
   {Upright Brackets in Emphasized Text}
 
 % --------------------------------------------------------------------------
 % check expl3 version:
-\@ifpackagelater { expl3 } { 2012/11/21 }
+\@ifpackagelater {expl3} {2012/11/21}
   { }
   {
-    \PackageError { embrac } { Support~package~expl3~too~old }
+    \PackageError {embrac} { Support~package~expl3~too~old }
       {
         You~need~to~update~your~installation~of~the~bundles~'l3kernel'~and~
         'l3packages'.\MessageBreak
@@ -124,30 +124,34 @@
   {
     \prop_map_inline:Nn \l__embrac_emph_obrackets_prop
       {
-        \tl_replace_all:Nnn #1 { ##1 }
+        \tl_replace_all:Nnn #1 {##1}
           {
             \mode_if_math:TF
-              { ##1 }
+              {##1}
               {
                 \embrac_kern:n
-                  { \prop_get:Nn \l__embrac_emph_obrackets_before_prop { ##1 } }
-                \embrac_braces_format:n { ##1 \embrac_kern:n { ##2 } }
+                  { \prop_get:Nn \l__embrac_emph_obrackets_before_prop {##1} }
+                \embrac_nobreak:
+                \embrac_braces_format:n {##1}
+                \embrac_nobreak:
+                \embrac_kern:n {##2}
                 \embrac_nobreak:
               }
           }
       }
     \prop_map_inline:Nn \l__embrac_emph_cbrackets_prop
       {
-        \tl_replace_all:Nnn #1 { ##1 }
+        \tl_replace_all:Nnn #1 {##1}
           {
             \mode_if_math:TF
-              { ##1 }
+              {##1}
               {
                 \embrac_nobreak:
-                \embrac_braces_format:n
-                  { \embrac_kern:n { ##2 } ##1 }
+                \embrac_kern:n {##2}
+                \embrac_nobreak:
+                \embrac_braces_format:n {##1}
                 \embrac_kern:n
-                  { \prop_get:Nn \l__embrac_emph_cbrackets_after_prop { ##1 } }
+                  { \prop_get:Nn \l__embrac_emph_cbrackets_after_prop {##1} }
               }
           }
       }
@@ -573,3 +577,4 @@
 2014/06/24 - v0.6  - add support for \textsl
 2014/07/03 - v0.6a - bugfix: remove unwanted (and unnecessary) expansion in
                      \__embrac_emph:n
+2015/09/06 - v0.6b - fix https://bitbucket.org/cgnieder/embrac/issues/5
