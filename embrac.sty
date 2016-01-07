@@ -34,30 +34,16 @@
 \RequirePackage { expl3 , xparse , l3keys2e }
 \ProvidesExplPackage
   {embrac}
-  {2015/09/06}
-  {0.6b}
+  {2015/11/13}
+  {0.6c}
   {Upright Brackets in Emphasized Text}
-
-% --------------------------------------------------------------------------
-% check expl3 version:
-\@ifpackagelater {expl3} {2012/11/21}
-  { }
-  {
-    \PackageError {embrac} { Support~package~expl3~too~old }
-      {
-        You~need~to~update~your~installation~of~the~bundles~'l3kernel'~and~
-        'l3packages'.\MessageBreak
-        Loading~embrac~will~abort!
-      }
-    \tex_endinput:D
-  }
 
 % --------------------------------------------------------------------------
 \bool_new:N \l__embrac_treat_biblatex_bool
 \tl_new:N   \l__embrac_tmpa_tl
 \tl_new:N   \l__embrac_treat_biblatex_tl
 
-\keys_define:nn { embrac }
+\keys_define:nn {embrac}
   {
     biblatex         .choice: ,
     biblatex / true  .code:n =
@@ -82,21 +68,7 @@
       { \prg_return_false: }
   }
 
-% save original commands, delay until begin document to catch `fontspec's
-% redefinitions:
-\AtBeginDocument{
-  \cs_new_eq:Nc \embrac_orig_emph:n { emph~ }
-  \cs_generate_variant:Nn \embrac_orig_emph:n { V }
-  \cs_new_eq:Nc \embrac_orig_textit:n { textit~ }
-  \cs_generate_variant:Nn \embrac_orig_textit:n { V }
-  \cs_new_eq:Nc \embrac_orig_textsl:n { textsl~ }
-  \cs_generate_variant:Nn \embrac_orig_textsl:n { V }
-  \embrac_if_fontspec:T
-    {
-      \cs_new_eq:Nc \embrac_orig_textsi:n { textsi~ }
-      \cs_generate_variant:Nn \embrac_orig_textsi:n { V }
-    }
-}
+\cs_generate_variant:Nn \cs_generate_variant:Nn {c}
 
 % preparations:
 \cs_new_eq:NN \embrac_braces_format:n \textup
@@ -104,8 +76,13 @@
 
 \prg_new_conditional:Npnn \embrac_empty_or_no_value:n #1 { F,TF }
   {
-    \IfNoValueTF { #1 } { \prg_return_true: }
-      { \tl_if_blank:nTF { #1 } { \prg_return_true: } { \prg_return_false: } }
+    \IfNoValueTF {#1}
+      { \prg_return_true: }
+      {
+        \tl_if_blank:nTF {#1}
+          { \prg_return_true: }
+          { \prg_return_false: }
+      }
   }
 
 \cs_new:Npn \embrac_nobreak:
@@ -157,43 +134,7 @@
       }
   }
 
-% internal \emph command:
-\cs_new_protected:Npn \__embrac_emph:n #1
-  {
-    \tl_set:Nn \l__embrac_tmpa_tl { #1 }
-    \embrac_replace_brackets:N \l__embrac_tmpa_tl
-    \embrac_orig_emph:V \l__embrac_tmpa_tl
-  }
-
-% internal \textit command:
-\cs_new_protected:Npn \__embrac_textit:n #1
-  {
-    \tl_set:Nn \l__embrac_tmpa_tl { #1 }
-    \embrac_replace_brackets:N \l__embrac_tmpa_tl
-    \embrac_orig_textit:V \l__embrac_tmpa_tl
-  }
-
-% internal \textsl command:
-\cs_new_protected:Npn \__embrac_textsl:n #1
-  {
-    \tl_set:Nn \l__embrac_tmpa_tl { #1 }
-    \embrac_replace_brackets:N \l__embrac_tmpa_tl
-    \embrac_orig_textsl:V \l__embrac_tmpa_tl
-  }
-
-% internal \textsi command:
-\AtBeginDocument{
-  \embrac_if_fontspec:T
-    {
-      \cs_new_protected:Npn \__embrac_textsi:n #1
-        {
-          \tl_set:Nn \l__embrac_tmpa_tl { #1 }
-          \embrac_replace_brackets:N \l__embrac_tmpa_tl
-          \embrac_orig_textsi:V \l__embrac_tmpa_tl
-        }
-    }
-  }
-
+% --------------------------------------------------------------------------
 % biblatex compatibility:
 \cs_new_protected:Npn \embrac_treat_bibparens:
   {
@@ -213,141 +154,72 @@
         \patchcmd[\protected\long]\blx@imc@mkbibemph
           {\emph}{\emph*}
           {}{}
+        \patchcmd[\protected\long]\blx@imc@mkbibitalic
+          {\textit}{\textit*}
+          {}{}
       }
   }
 
-% internal \emph command, second layer:
-\cs_new_protected:Npn \embrac_emph:nn #1#2
-  {
-    \group_begin:
-      \embrac_treat_bibparens:
-      \tl_if_eq:nnTF { #1 } { * }
-        { \embrac_orig_emph:n { #2 } }
-        { \__embrac_emph:n { #2 } }
-    \group_end:
-  }
+% --------------------------------------------------------------------------
+% redefine \emph and friends:
+\seq_new:N \l__embrac_changed_macros_seq
 
-% internal \textit command, second layer:
-\cs_new_protected:Npn \embrac_textit:nn #1#2
+\cs_new_protected:Npn \embrac_new_replacement_macro:n #1
   {
-    \group_begin:
-      \embrac_treat_bibparens:
-      \tl_if_eq:nnTF { #1 } { * }
-        { \embrac_orig_textit:n { #2 } }
-        { \__embrac_textit:n { #2 } }
-    \group_end:
-  }
-
-% internal \textsl command, second layer:
-\cs_new_protected:Npn \embrac_textsl:nn #1#2
-  {
-    \group_begin:
-      \embrac_treat_bibparens:
-      \tl_if_eq:nnTF { #1 } { * }
-        { \embrac_orig_textsl:n { #2 } }
-        { \__embrac_textsl:n { #2 } }
-    \group_end:
-  }
-
-% internal \textsi command, second layer:
-\AtBeginDocument{
-  \embrac_if_fontspec:T
-    {
-      \cs_new_protected:Npn \embrac_textsi:nn #1#2
-        {
-          \group_begin:
+    \seq_put_right:Nn \l__embrac_changed_macros_seq {#1}
+    \cs_new_eq:cc {embrac_orig_#1:n} {#1~}
+    \cs_generate_variant:cn {embrac_orig_#1:n} {V}
+    \cs_new_protected:cpn {__embrac_#1:n} ##1
+      {
+        \tl_set:Nn \l__embrac_tmpa_tl {##1}
+        \embrac_replace_brackets:N \l__embrac_tmpa_tl
+        \use:c {embrac_orig_#1:V} \l__embrac_tmpa_tl
+      }
+    \cs_new_protected:cpn {embrac_#1:nn} ##1##2
+      {
+        \group_begin:
           \embrac_treat_bibparens:
-            \tl_if_eq:nnTF { #1 } { * }
-              { \embrac_orig_textsi:n { #2 } }
-              { \__embrac_textsi:n { #2 } }
-          \group_end:
-        }
-    }
+          \tl_if_eq:nnTF {##1} {*}
+            { \use:c {embrac_orig_#1:n} {##2} }
+            { \use:c {__embrac_#1:n} {##2} }
+        \group_end:
+      }
+    \exp_args:Nc \RenewDocumentCommand {#1} {sm}
+      {
+        \IfBooleanTF {##1}
+          { \use:c {embrac_#1:nn} {*} {##2} }
+          { \use:c {embrac_#1:nn} { } {##2} }
+      }
   }
 
-% user command \emph:
-\RenewDocumentCommand \emph { sm }
-  {
-    \IfBooleanTF { #1 }
-      { \embrac_emph:nn { * } { #2 } }
-      { \embrac_emph:nn {   } { #2 } }
-  }
-
-% user command \textit:
-\RenewDocumentCommand \textit { sm }
-  {
-    \IfBooleanTF { #1 }
-      { \embrac_textit:nn { * } { #2 } }
-      { \embrac_textit:nn {   } { #2 } }
-  }
-
-% user command \textsl:
-\RenewDocumentCommand \textsl { sm }
-  {
-    \IfBooleanTF { #1 }
-      { \embrac_textsl:nn { * } { #2 } }
-      { \embrac_textsl:nn {   } { #2 } }
-  }
-
-% user command \textsi:
-\AtBeginDocument{
-  \embrac_if_fontspec:T
-    {
-      \RenewDocumentCommand \textsi { sm }
-        {
-          \IfBooleanTF { #1 }
-            { \embrac_textsi:nn { * } { #2 } }
-            { \embrac_textsi:nn {   } { #2 } }
-        }
-    }
-  }
+\embrac_new_replacement_macro:n {emph}
+\embrac_new_replacement_macro:n {textit}
+\embrac_new_replacement_macro:n {textsl}
+\AtBeginDocument
+  { \embrac_if_fontspec:T { \embrac_new_replacement_macro:n {textsi} } }
 
 % --------------------------------------------------------------------------
 % TURNING EMBRAC OFF AND ON:
 % turning embrac off:
 \NewDocumentCommand \EmbracOff {}
   {
-    \RenewDocumentCommand \emph { sm }
-      { \embrac_orig_emph:n { ##2 } }
-    \RenewDocumentCommand \textit { sm }
-      { \embrac_orig_textit:n { ##2 } }
-    \RenewDocumentCommand \textsl { sm }
-      { \embrac_orig_textsl:n { ##2 } }
-    \cs_if_exist:NT \textsi
+    \seq_map_inline:Nn \l__embrac_changed_macros_seq
       {
-        \RenewDocumentCommand \textsi { sm }
-          { \embrac_orig_textsi:n { ##2 } }
+        \exp_args:Nc \RenewDocumentCommand {##1} {sm}
+          { \use:c {embrac_orig_##1:n} {####2} }
       }
   }
 
 % turning embrac on:
 \NewDocumentCommand \EmbracOn {}
   {
-    \RenewDocumentCommand \emph { sm }
+    \seq_map_inline:Nn \l__embrac_changed_macros_seq
       {
-        \IfBooleanTF { ##1 }
-          { \embrac_emph:nn { * } { ##2 } }
-          { \embrac_emph:nn {   } { ##2 } }
-      }
-    \RenewDocumentCommand \textit { sm }
-      {
-        \IfBooleanTF { ##1 }
-          { \embrac_textit:nn { * } { ##2 } }
-          { \embrac_textit:nn {   } { ##2 } }
-      }
-    \RenewDocumentCommand \textsl { sm }
-      {
-        \IfBooleanTF { ##1 }
-          { \embrac_textsl:nn { * } { ##2 } }
-          { \embrac_textsl:nn {   } { ##2 } }
-      }
-    \cs_if_exist:NT \textsi
-      {
-        \RenewDocumentCommand \textsi { sm }
+        \exp_args:Nc \RenewDocumentCommand {##1} {sm}
           {
-            \IfBooleanTF { ##1 }
-              { \embrac_textsi:nn { * } { ##2 } }
-              { \embrac_textsi:nn {   } { ##2 } }
+            \IfBooleanTF {####1}
+              { \use:c {embrac_##1:nn} {*} {####2} }
+              { \use:c {embrac_##1:nn} { } {####2} }
           }
       }
   }
@@ -357,194 +229,194 @@
 % internal add commands:
 \cs_new_protected:Npn \embrac_add_op_to_emph:nnn #1#2#3
   {
-    \embrac_empty_or_no_value:nTF { #2 }
-      { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_prop { #1 } { 0pt } }
-      { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_prop { #1 } { #2 } }
-    \embrac_empty_or_no_value:nTF { #3 }
-      { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_before_prop { #1 } { 0pt } }
-      { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_before_prop { #1 } { #3 } }
+    \embrac_empty_or_no_value:nTF {#2}
+      { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_prop {#1} {0pt} }
+      { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_prop {#1} {#2} }
+    \embrac_empty_or_no_value:nTF {#3}
+      { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_before_prop {#1} {0pt} }
+      { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_before_prop {#1} {#3} }
   }
 
 \cs_new_protected:Npn \embrac_add_cl_to_emph:nnn #1#2#3
   {
-    \embrac_empty_or_no_value:nTF { #2 }
-      { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_prop { #1 } { 0pt } }
-      { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_prop { #1 } { #2 } }
-    \embrac_empty_or_no_value:nTF { #3 }
-      { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_after_prop { #1 } { 0pt } }
-      { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_after_prop { #1 } { #3 } }
+    \embrac_empty_or_no_value:nTF {#2}
+      { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_prop {#1} {0pt} }
+      { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_prop {#1} {#2} }
+    \embrac_empty_or_no_value:nTF {#3}
+      { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_after_prop {#1} {0pt} }
+      { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_after_prop {#1} {#3} }
   }
 
 \cs_new_protected:Npn \embrac_add_to_emph:nnnnnn #1#2#3#4#5#6
   {
-    \embrac_add_op_to_emph:nnn { #1 } { #2 } { #3 }
-    \embrac_add_cl_to_emph:nnn { #4 } { #5 } { #6 }
+    \embrac_add_op_to_emph:nnn {#1} {#2} {#3}
+    \embrac_add_cl_to_emph:nnn {#4} {#5} {#6}
   }
 
 % internal delete commands:
 \cs_new_protected:Npn \embrac_remove_op_from_emph:n #1
   {
-    \prop_remove:Nn \l__embrac_emph_obrackets_prop { #1 }
-    \prop_remove:Nn \l__embrac_emph_obrackets_before_prop { #1 }
+    \prop_remove:Nn \l__embrac_emph_obrackets_prop {#1}
+    \prop_remove:Nn \l__embrac_emph_obrackets_before_prop {#1}
   }
 
 \cs_new_protected:Npn \embrac_remove_cl_from_emph:n #1
   {
-    \prop_remove:Nn \l__embrac_emph_cbrackets_prop { #1 }
-    \prop_remove:Nn \l__embrac_emph_cbrackets_after_prop { #1 }
+    \prop_remove:Nn \l__embrac_emph_cbrackets_prop {#1}
+    \prop_remove:Nn \l__embrac_emph_cbrackets_after_prop {#1}
   }
   
 \cs_new_protected:Npn \embrac_remove_from_emph:nn #1#2
   {
-    \embrac_remove_op_from_emph:n { #1 }
-    \embrac_remove_cl_from_emph:n { #2 }
+    \embrac_remove_op_from_emph:n {#1}
+    \embrac_remove_cl_from_emph:n {#2}
   }
 
 % internal renew commands:
 \cs_new_protected:Npn \embrac_renew_op_emph:nnn #1#2#3
   {
-    \embrac_empty_or_no_value:nTF { #2 }
-      { \prop_put:Nnn \l__embrac_emph_obrackets_prop { #1 } { 0pt } }
-      { \prop_put:Nnn \l__embrac_emph_obrackets_prop { #1 } { #2 } }
-    \embrac_empty_or_no_value:nTF { #3 }
-      { \prop_put:Nnn \l__embrac_emph_obrackets_before_prop { #1 } { 0pt } }
-      { \prop_put:Nnn \l__embrac_emph_obrackets_before_prop { #1 } { #3 } }
+    \embrac_empty_or_no_value:nTF {#2}
+      { \prop_put:Nnn \l__embrac_emph_obrackets_prop {#1} {0pt} }
+      { \prop_put:Nnn \l__embrac_emph_obrackets_prop {#1} {#2} }
+    \embrac_empty_or_no_value:nTF {#3}
+      { \prop_put:Nnn \l__embrac_emph_obrackets_before_prop {#1} {0pt} }
+      { \prop_put:Nnn \l__embrac_emph_obrackets_before_prop {#1} {#3} }
   }
 
 \cs_new_protected:Npn \embrac_renew_cl_emph:nnn #1#2#3
   {
-    \embrac_empty_or_no_value:nTF { #2 }
-      { \prop_put:Nnn \l__embrac_emph_cbrackets_prop { #1 } { 0pt } }
-      { \prop_put:Nnn \l__embrac_emph_cbrackets_prop { #1 } { #2 } }
-    \embrac_empty_or_no_value:nTF { #3 }
-      { \prop_put:Nnn \l__embrac_emph_cbrackets_after_prop { #1 } { 0pt } }
-      { \prop_put:Nnn \l__embrac_emph_cbrackets_after_prop { #1 } { #3 } }
+    \embrac_empty_or_no_value:nTF {#2}
+      { \prop_put:Nnn \l__embrac_emph_cbrackets_prop {#1} {0pt} }
+      { \prop_put:Nnn \l__embrac_emph_cbrackets_prop {#1} {#2} }
+    \embrac_empty_or_no_value:nTF {#3}
+      { \prop_put:Nnn \l__embrac_emph_cbrackets_after_prop {#1} {0pt} }
+      { \prop_put:Nnn \l__embrac_emph_cbrackets_after_prop {#1} {#3} }
   }
 
 \cs_new_protected:Npn \embrac_renew_emph:nnnnnn #1#2#3#4#5#6
   {
-    \embrac_renew_op_emph:nnn { #1 } { #2 } { #3 }
-    \embrac_renew_cl_emph:nnn { #4 } { #5 } { #6 }
+    \embrac_renew_op_emph:nnn {#1} {#2} {#3}
+    \embrac_renew_cl_emph:nnn {#4} {#5} {#6}
   }
 
 % internal change commands:
 \cs_new_protected:Npn \embrac_change_op_emph:nnn #1#2#3
   {
-    \prop_if_in:NnT \l__embrac_emph_obrackets_prop { #1 }
+    \prop_if_in:NnT \l__embrac_emph_obrackets_prop {#1}
       {
-        \embrac_empty_or_no_value:nF { #2 }
-          { \prop_put:Nnn \l__embrac_emph_obrackets_prop { #1 } { #2 } }
-        \embrac_empty_or_no_value:nF { #3 }
-          { \prop_put:Nnn \l__embrac_emph_obrackets_before_prop { #1 } { #3 } }
+        \embrac_empty_or_no_value:nF {#2}
+          { \prop_put:Nnn \l__embrac_emph_obrackets_prop {#1} {#2} }
+        \embrac_empty_or_no_value:nF {#3}
+          { \prop_put:Nnn \l__embrac_emph_obrackets_before_prop {#1} {#3} }
       }
   }
 
 \cs_new_protected:Npn \embrac_change_cl_emph:nnn #1#2#3
   {
-    \prop_if_in:NnT \l__embrac_emph_cbrackets_prop { #1 }
+    \prop_if_in:NnT \l__embrac_emph_cbrackets_prop {#1}
       {
-        \embrac_empty_or_no_value:nF { #2 }
-          { \prop_put:Nnn \l__embrac_emph_cbrackets_prop { #1 } { #2 } }
-        \embrac_empty_or_no_value:nF { #3 }
-          { \prop_put:Nnn \l__embrac_emph_cbrackets_after_prop { #1 } { #3 } }
+        \embrac_empty_or_no_value:nF {#2}
+          { \prop_put:Nnn \l__embrac_emph_cbrackets_prop {#1} {#2} }
+        \embrac_empty_or_no_value:nF {#3}
+          { \prop_put:Nnn \l__embrac_emph_cbrackets_after_prop {#1} {#3} }
       }
   }
 
 \cs_new_protected:Npn \embrac_change_emph:nnnnnn #1#2#3#4#5#6
   {
-    \embrac_change_op_emph:nnn { #1 } { #2 } { #3 }
-    \embrac_change_cl_emph:nnn { #4 } { #5 } { #6 }
+    \embrac_change_op_emph:nnn {#1} {#2} {#3}
+    \embrac_change_cl_emph:nnn {#4} {#5} {#6}
   }
 
 % --------------------------------------------------------------------------
 % user commands:
 \NewDocumentCommand \AddEmph
   {
-    m > { \SplitArgument { 1 } { , } } O{,}
-    m > { \SplitArgument { 1 } { , } } O{,}
+    m > { \SplitArgument {1} {,} } O{,}
+    m > { \SplitArgument {1} {,} } O{,}
   }
   {
-    \embrac_add_to_emph:nnnnnn { #1 } #2 { #3 } #4
+    \embrac_add_to_emph:nnnnnn {#1} #2 {#3} #4
     \ignorespaces
   }
 
 \NewDocumentCommand \AddOpEmph
-  { m > { \SplitArgument { 1 } { , } } O{,} }
+  { m > { \SplitArgument {1} {,} } O{,} }
   {
-    \embrac_add_op_to_emph:nnn { #1 } #2
+    \embrac_add_op_to_emph:nnn {#1} #2
     \ignorespaces
   }
 
 \NewDocumentCommand \AddClEmph
-  { m > { \SplitArgument { 1 } { , } } O{,} }
+  { m > { \SplitArgument {1} {,} } O{,} }
   {
-    \embrac_add_cl_to_emph:nnn { #1 } #2
+    \embrac_add_cl_to_emph:nnn {#1} #2
     \ignorespaces
   }
 
 \NewDocumentCommand \DeleteEmph { mm }
   {
-    \embrac_remove_from_emph:nn { #1 } { #2 }
+    \embrac_remove_from_emph:nn {#1} {#2}
     \ignorespaces
   }
 
 \NewDocumentCommand \DeleteOpEmph { mm }
   {
-    \embrac_remove_op_from_emph:n { #1 }
+    \embrac_remove_op_from_emph:n {#1}
     \ignorespaces
   }
 
 \NewDocumentCommand \DeleteClEmph { mm }
   {
-    \embrac_remove_cl_from_emph:n { #1 }
+    \embrac_remove_cl_from_emph:n {#1}
     \ignorespaces
   }
 
 \NewDocumentCommand \RenewEmph
   {
-    m > { \SplitArgument { 1 } { , } } O{,}
-    m > { \SplitArgument { 1 } { , } } O{,}
+    m > { \SplitArgument {1} {,} } O{,}
+    m > { \SplitArgument {1} {,} } O{,}
   }
   {
-    \embrac_renew_emph:nnnnnn { #1 } #2 { #3 } #4
+    \embrac_renew_emph:nnnnnn {#1} #2 {#3} #4
     \ignorespaces
   }
 
 \NewDocumentCommand \RenewOpEmph
-  { m > { \SplitArgument { 1 } { , } } O{,} }
+  { m > { \SplitArgument {1} {,} } O{,} }
   {
-    \embrac_renew_op_emph:nnn { #1 } #2
+    \embrac_renew_op_emph:nnn {#1} #2
     \ignorespaces
   }
 
 \NewDocumentCommand \RenewClEmph
-  { m > { \SplitArgument { 1 } { , } } O{,} }
+  { m > { \SplitArgument {1} {,} } O{,} }
   {
-    \embrac_renew_cl_emph:nnn { #1 } #2
+    \embrac_renew_cl_emph:nnn {#1} #2
     \ignorespaces
   }
 
 \NewDocumentCommand \ChangeEmph
   {
-    m > { \SplitArgument { 1 } { , } } O{,}
-    m > { \SplitArgument { 1 } { , } } O{,}
+    m > { \SplitArgument {1} {,} } O{,}
+    m > { \SplitArgument {1} {,} } O{,}
   }
   {
-    \embrac_change_emph:nnnnnn { #1 } #2 { #3 } #4
+    \embrac_change_emph:nnnnnn {#1} #2 {#3} #4
     \ignorespaces
   }
 
 \NewDocumentCommand \ChangeOpEmph
-  { m > { \SplitArgument { 1 } { , } } O{,} }
+  { m > { \SplitArgument {1} {,} } O{,} }
   {
-    \embrac_change_op_emph:nnn { #1 } #2
+    \embrac_change_op_emph:nnn {#1} #2
     \ignorespaces
   }
 
 \NewDocumentCommand \ChangeClEmph
-  { m > { \SplitArgument { 1 } { , } } O{,} }
+  { m > { \SplitArgument {1} {,} } O{,} }
   {
-    \embrac_change_cl_emph:nnn { #1 } #2
+    \embrac_change_cl_emph:nnn {#1} #2
     \ignorespaces
   }
 
@@ -553,7 +425,7 @@
 \AddEmph{[}{]}[.04em,-.12em]
 \AddEmph{(}[-.04em]{)}[,-.15em]
 
-\ProcessKeysOptions { embrac }
+\ProcessKeysOptions {embrac}
 
 \AtBeginDocument { \embrac_treat_bibemph: }
 
@@ -578,3 +450,4 @@
 2014/07/03 - v0.6a - bugfix: remove unwanted (and unnecessary) expansion in
                      \__embrac_emph:n
 2015/09/06 - v0.6b - fix https://bitbucket.org/cgnieder/embrac/issues/5
+2015/11/13 - v0.6c - avoid code duplication
