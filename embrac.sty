@@ -107,7 +107,7 @@
               {##1}
               {
                 \embrac_kern:n
-                  { \prop_get:Nn \l__embrac_emph_obrackets_before_prop {##1} }
+                  { \prop_item:Nn \l__embrac_emph_obrackets_before_prop {##1} }
                 \embrac_nobreak:
                 \embrac_braces_format:n {##1}
                 \embrac_nobreak:
@@ -128,7 +128,7 @@
                 \embrac_nobreak:
                 \embrac_braces_format:n {##1}
                 \embrac_kern:n
-                  { \prop_get:Nn \l__embrac_emph_cbrackets_after_prop {##1} }
+                  { \prop_item:Nn \l__embrac_emph_cbrackets_after_prop {##1} }
               }
           }
       }
