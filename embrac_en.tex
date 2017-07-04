@@ -99,12 +99,13 @@ package probably wouldn't exist.
 
 \section{New}
 \begin{description}
- \item[v0.1a] The command \cs{RenewEmph} has been renamed into
-   \cs{ChangeEmph} and a new slightly different \cs{RenewEmph} has been added.
- \item[v0.2] Improved interaction with \pkg{biblatex}.
- \item[v0.3] Added support for \pkg*{fontspec}'s \cs{textsi}.
- \item[v0.5] Don't replace brackets in math mode.
- \item[v0.6] Added support for \cs{textsl}.
+  \item[v0.1a] The command \cs{RenewEmph} has been renamed into
+    \cs{ChangeEmph} and a new slightly different \cs{RenewEmph} has been added.
+  \item[v0.2] Improved interaction with \pkg{biblatex}.
+  \item[v0.3] Added support for \pkg*{fontspec}'s \cs{textsi}.
+  \item[v0.5] Don't replace brackets in math mode.
+  \item[v0.6] Added support for \cs{textsl}.
+  \item[v0.7] Added support for symbols with a catcode other than~12.
 \end{description}
 
 \section{About}\label{sec:about}
@@ -321,7 +322,7 @@ This is \embrac's only package option:
   \emph{Let's cite Bringhurst again:~\cite{bringhurst04}}.
 \end{example}
 
-\section{Turn \embrac Temporarily Off}
+\section{Turn \embrac\ Temporarily Off}
 Redefining \cs{emph}, \cs{textit} and \cs{textsl} is not without danger.
 Sometimes you might find that you'd want to keep the original definition for a
 small portion of your document.  You can use the following commands whose
