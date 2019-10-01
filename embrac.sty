@@ -8,7 +8,7 @@
 % Web:    https://bitbucket.org/cgnieder/embrac/
 % E-Mail: contact@mychemistry.eu
 % --------------------------------------------------------------------------
-% Copyright 2012--2017 Clemens Niederberger
+% Copyright 2012--2019 Clemens Niederberger
 % 
 % This work may be distributed and/or modified under the
 % conditions of the LaTeX Project Public License, either version 1.3
@@ -34,14 +34,17 @@
 \RequirePackage { expl3 , xparse , l3keys2e }
 \ProvidesExplPackage
   {embrac}
-  {2017/07/04}
-  {0.7}
+  {2019/10/01}
+  {0.7a}
   {Upright Brackets in Emphasized Text}
 
 % --------------------------------------------------------------------------
 \bool_new:N \l__embrac_treat_biblatex_bool
-\tl_new:N   \l__embrac_tmpa_tl
-\tl_new:N   \l__embrac_treat_biblatex_tl
+
+\tl_new:N \l__embrac_tmpa_tl
+\tl_new:N \l__embrac_treat_biblatex_tl
+
+\int_new:N \l__embrac_penalty_int
 
 \keys_define:nn {embrac}
   {
@@ -85,53 +88,73 @@
       }
   }
 
-\cs_new:Npn \embrac_nobreak:
-  { \tex_penalty:D 10000 \scan_stop: }
+\cs_new_protected:Npn \embrac_nobreak:
+  { \embrac_allow_break:n {10000} }
+
+\cs_new_protected:Npn \embrac_allow_break:n #1
+  { \tex_penalty:D #1 \scan_stop: }
+
+\cs_new_protected:Npn \embrac_save_penalty:
+  { \int_set:Nn \l__embrac_penalty_int { \lastpenalty } }
 
 % --------------------------------------------------------------------------
 % THE MAIN PART:
 % storage of the tokens to be replaced:
-\prop_new:N \l__embrac_emph_obrackets_symp_prop
-\prop_new:N \l__embrac_emph_obrackets_prop
-\prop_new:N \l__embrac_emph_obrackets_before_prop
-\prop_new:N \l__embrac_emph_cbrackets_symp_prop
-\prop_new:N \l__embrac_emph_cbrackets_prop
-\prop_new:N \l__embrac_emph_cbrackets_after_prop
+\prop_new:N \l__embrac_emph_obrackets_symbol_prop
+\prop_new:N \l__embrac_emph_obrackets_inner_prop
+\prop_new:N \l__embrac_emph_obrackets_outer_prop
+\prop_new:N \l__embrac_emph_cbrackets_symbol_prop
+\prop_new:N \l__embrac_emph_cbrackets_inner_prop
+\prop_new:N \l__embrac_emph_cbrackets_outer_prop
 
-\cs_new_protected:Npn \__embrac_replace:Nnnn #1#2#3#4
+\bool_new:N \l__embrac_opening_bool
+
+% #1: tl macro
+% #2: code before
+% #3: kerning before
+% #4: symbol
+% #5: kerning after
+% #6: code after
+\cs_new_protected:Npn \__embrac_replace:Nnnnnn #1#2#3#4#5#6
   {
-    \tl_replace_all:Nnn #1 {#3}
+    \tl_replace_all:Nnn #1 {#4}
       {
         \mode_if_math:TF
           {#3}
           {
-            \embrac_kern:n {#2}
+            #2
+            \embrac_kern:n {#3}
             \embrac_nobreak:
-            \embrac_braces_format:n {#3}
+            \embrac_braces_format:n {#4}
             \embrac_nobreak:
-            \embrac_kern:n {#4}
-            \embrac_nobreak:
+            \embrac_kern:n {#5}
+            #6
           }
       }
   }
-\cs_generate_variant:Nn \__embrac_replace:Nnnn {Nxx,Nnxx}
+\cs_generate_variant:Nn \__embrac_replace:Nnnnnn {Nnxx,Nnnxx}
 
 % do the replacing:
+% #1: tl macro
 \cs_new_protected:Npn \embrac_replace_brackets:N #1
   {
-    \prop_map_inline:Nn \l__embrac_emph_obrackets_prop
+    \prop_map_inline:Nn \l__embrac_emph_obrackets_inner_prop
       {
-        \__embrac_replace:Nxxn #1
-          { \prop_item:Nn \l__embrac_emph_obrackets_before_prop {##1} }
-          { \prop_item:Nn \l__embrac_emph_obrackets_symp_prop {##1} }
+        \__embrac_replace:Nnxxnn #1
+          { \embrac_allow_break:n { \lastpenalty } }
+          { \prop_item:Nn \l__embrac_emph_obrackets_outer_prop {##1} }
+          { \prop_item:Nn \l__embrac_emph_obrackets_symbol_prop {##1} }
           {##2}
+          { \embrac_nobreak: }
       }
-    \prop_map_inline:Nn \l__embrac_emph_cbrackets_prop
+    \prop_map_inline:Nn \l__embrac_emph_cbrackets_inner_prop
       {
-        \__embrac_replace:Nnxx #1
+        \__embrac_replace:Nnnxxn #1
+          { \embrac_save_penalty: \embrac_nobreak: }
           {##2}
-          { \prop_item:Nn \l__embrac_emph_cbrackets_symp_prop {##1} }
-          { \prop_item:Nn \l__embrac_emph_cbrackets_after_prop {##1} }
+          { \prop_item:Nn \l__embrac_emph_cbrackets_symbol_prop {##1} }
+          { \prop_item:Nn \l__embrac_emph_cbrackets_outer_prop {##1} }
+          { \embrac_allow_break:n { \l__embrac_penalty_int } }
       }
   }
 
@@ -165,6 +188,7 @@
 % redefine \emph and friends:
 \seq_new:N \l__embrac_changed_macros_seq
 
+% #1: name of macro to be treated
 \cs_new_protected:Npn \embrac_new_replacement_macro:n #1
   {
     \seq_put_right:Nn \l__embrac_changed_macros_seq {#1}
@@ -230,24 +254,24 @@
 % internal add commands:
 \cs_new_protected:Npn \embrac_add_op_to_emph:nnn #1#2#3
   {
-    \prop_put:Nnn \l__embrac_emph_obrackets_symp_prop {#1} {#1}
+    \prop_put:Nnn \l__embrac_emph_obrackets_symbol_prop {#1} {#1}
     \embrac_empty_or_no_value:nTF {#2}
-      { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_prop {#1} {0pt} }
-      { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_prop {#1} {#2} }
+      { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_inner_prop {#1} {0pt} }
+      { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_inner_prop {#1} {#2} }
     \embrac_empty_or_no_value:nTF {#3}
-      { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_before_prop {#1} {0pt} }
-      { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_before_prop {#1} {#3} }
+      { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_outer_prop {#1} {0pt} }
+      { \prop_put_if_new:Nnn \l__embrac_emph_obrackets_outer_prop {#1} {#3} }
   }
 
 \cs_new_protected:Npn \embrac_add_cl_to_emph:nnn #1#2#3
   {
-    \prop_put:Nnn \l__embrac_emph_cbrackets_symp_prop {#1} {#1}
+    \prop_put:Nnn \l__embrac_emph_cbrackets_symbol_prop {#1} {#1}
     \embrac_empty_or_no_value:nTF {#2}
-      { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_prop {#1} {0pt} }
-      { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_prop {#1} {#2} }
+      { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_inner_prop {#1} {0pt} }
+      { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_inner_prop {#1} {#2} }
     \embrac_empty_or_no_value:nTF {#3}
-      { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_after_prop {#1} {0pt} }
-      { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_after_prop {#1} {#3} }
+      { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_outer_prop {#1} {0pt} }
+      { \prop_put_if_new:Nnn \l__embrac_emph_cbrackets_outer_prop {#1} {#3} }
   }
 
 \cs_new_protected:Npn \embrac_add_to_emph:nnnnnn #1#2#3#4#5#6
@@ -259,14 +283,14 @@
 % internal delete commands:
 \cs_new_protected:Npn \embrac_remove_op_from_emph:n #1
   {
-    \prop_remove:Nn \l__embrac_emph_obrackets_prop {#1}
-    \prop_remove:Nn \l__embrac_emph_obrackets_before_prop {#1}
+    \prop_remove:Nn \l__embrac_emph_obrackets_inner_prop {#1}
+    \prop_remove:Nn \l__embrac_emph_obrackets_outer_prop {#1}
   }
 
 \cs_new_protected:Npn \embrac_remove_cl_from_emph:n #1
   {
-    \prop_remove:Nn \l__embrac_emph_cbrackets_prop {#1}
-    \prop_remove:Nn \l__embrac_emph_cbrackets_after_prop {#1}
+    \prop_remove:Nn \l__embrac_emph_cbrackets_inner_prop {#1}
+    \prop_remove:Nn \l__embrac_emph_cbrackets_outer_prop {#1}
   }
   
 \cs_new_protected:Npn \embrac_remove_from_emph:nn #1#2
@@ -279,21 +303,21 @@
 \cs_new_protected:Npn \embrac_renew_op_emph:nnn #1#2#3
   {
     \embrac_empty_or_no_value:nTF {#2}
-      { \prop_put:Nnn \l__embrac_emph_obrackets_prop {#1} {0pt} }
-      { \prop_put:Nnn \l__embrac_emph_obrackets_prop {#1} {#2} }
+      { \prop_put:Nnn \l__embrac_emph_obrackets_inner_prop {#1} {0pt} }
+      { \prop_put:Nnn \l__embrac_emph_obrackets_inner_prop {#1} {#2} }
     \embrac_empty_or_no_value:nTF {#3}
-      { \prop_put:Nnn \l__embrac_emph_obrackets_before_prop {#1} {0pt} }
-      { \prop_put:Nnn \l__embrac_emph_obrackets_before_prop {#1} {#3} }
+      { \prop_put:Nnn \l__embrac_emph_obrackets_outer_prop {#1} {0pt} }
+      { \prop_put:Nnn \l__embrac_emph_obrackets_outer_prop {#1} {#3} }
   }
 
 \cs_new_protected:Npn \embrac_renew_cl_emph:nnn #1#2#3
   {
     \embrac_empty_or_no_value:nTF {#2}
-      { \prop_put:Nnn \l__embrac_emph_cbrackets_prop {#1} {0pt} }
-      { \prop_put:Nnn \l__embrac_emph_cbrackets_prop {#1} {#2} }
+      { \prop_put:Nnn \l__embrac_emph_cbrackets_inner_prop {#1} {0pt} }
+      { \prop_put:Nnn \l__embrac_emph_cbrackets_inner_prop {#1} {#2} }
     \embrac_empty_or_no_value:nTF {#3}
-      { \prop_put:Nnn \l__embrac_emph_cbrackets_after_prop {#1} {0pt} }
-      { \prop_put:Nnn \l__embrac_emph_cbrackets_after_prop {#1} {#3} }
+      { \prop_put:Nnn \l__embrac_emph_cbrackets_outer_prop {#1} {0pt} }
+      { \prop_put:Nnn \l__embrac_emph_cbrackets_outer_prop {#1} {#3} }
   }
 
 \cs_new_protected:Npn \embrac_renew_emph:nnnnnn #1#2#3#4#5#6
@@ -305,23 +329,23 @@
 % internal change commands:
 \cs_new_protected:Npn \embrac_change_op_emph:nnn #1#2#3
   {
-    \prop_if_in:NnT \l__embrac_emph_obrackets_prop {#1}
+    \prop_if_in:NnT \l__embrac_emph_obrackets_inner_prop {#1}
       {
         \embrac_empty_or_no_value:nF {#2}
-          { \prop_put:Nnn \l__embrac_emph_obrackets_prop {#1} {#2} }
+          { \prop_put:Nnn \l__embrac_emph_obrackets_inner_prop {#1} {#2} }
         \embrac_empty_or_no_value:nF {#3}
-          { \prop_put:Nnn \l__embrac_emph_obrackets_before_prop {#1} {#3} }
+          { \prop_put:Nnn \l__embrac_emph_obrackets_outer_prop {#1} {#3} }
       }
   }
 
 \cs_new_protected:Npn \embrac_change_cl_emph:nnn #1#2#3
   {
-    \prop_if_in:NnT \l__embrac_emph_cbrackets_prop {#1}
+    \prop_if_in:NnT \l__embrac_emph_cbrackets_inner_prop {#1}
       {
         \embrac_empty_or_no_value:nF {#2}
-          { \prop_put:Nnn \l__embrac_emph_cbrackets_prop {#1} {#2} }
+          { \prop_put:Nnn \l__embrac_emph_cbrackets_inner_prop {#1} {#2} }
         \embrac_empty_or_no_value:nF {#3}
-          { \prop_put:Nnn \l__embrac_emph_cbrackets_after_prop {#1} {#3} }
+          { \prop_put:Nnn \l__embrac_emph_cbrackets_outer_prop {#1} {#3} }
       }
   }
 
@@ -457,3 +481,4 @@
 2016/01/07 - v0.6d - \prop_get:Nn => \prop_item:Nn
 2017/07/04 - v0.7  - implement issue #8 (now treatment of symbols with catcode
                      other than 12 is possible)
+2019/10/01 - v0.7a - fix issue #9
