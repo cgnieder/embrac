@@ -34,8 +34,8 @@
 \RequirePackage { expl3 , xparse , l3keys2e }
 \ProvidesExplPackage
   {embrac}
-  {2019/10/01}
-  {0.8}
+  {2019/12/31}
+  {0.9}
   {Upright Brackets in Emphasized Text}
 
 % --------------------------------------------------------------------------
@@ -89,13 +89,10 @@
   }
 
 \cs_new_protected:Npn \embrac_nobreak:
-  { \embrac_allow_break:n {10000} }
+  { \tex_penalty:D 10000 \scan_stop: }
 
-\cs_new_protected:Npn \embrac_allow_break:n #1
-  { \tex_penalty:D #1 \scan_stop: }
-
-\cs_new_protected:Npn \embrac_save_penalty:
-  { \int_set:Nn \l__embrac_penalty_int { \lastpenalty } }
+\cs_new_protected:Npn \embrac_allow_break:
+  { \tex_penalty:D 0 \scan_stop: }
 
 % --------------------------------------------------------------------------
 % THE MAIN PART:
@@ -110,29 +107,28 @@
 \bool_new:N \l__embrac_opening_bool
 
 % #1: tl macro
-% #2: code before
-% #3: kerning before
-% #4: symbol
-% #5: kerning after
-% #6: code after
-\cs_new_protected:Npn \__embrac_replace:Nnnnnn #1#2#3#4#5#6
+% #2: kerning before
+% #3: symbol
+% #4: kerning after
+% #5: code after
+\cs_new_protected:Npn \__embrac_replace:Nnnnn #1#2#3#4#5
   {
-    \tl_replace_all:Nnn #1 {#4}
+    \tl_replace_all:Nnn #1 {#3}
       {
         \mode_if_math:TF
           {#4}
           {
-            #2
-            \embrac_kern:n {#3}
             \embrac_nobreak:
-            \embrac_braces_format:n {#4}
+            \embrac_kern:n {#2}
             \embrac_nobreak:
-            \embrac_kern:n {#5}
-            #6
+            \embrac_braces_format:n {#3}
+            \embrac_nobreak:
+            \embrac_kern:n {#4}
+            #5
           }
       }
   }
-\cs_generate_variant:Nn \__embrac_replace:Nnnnnn {Nnxx,Nnnxx}
+\cs_generate_variant:Nn \__embrac_replace:Nnnnn {Nxx,Nnxx}
 
 % do the replacing:
 % #1: tl macro
@@ -140,8 +136,7 @@
   {
     \prop_map_inline:Nn \l__embrac_emph_obrackets_inner_prop
       {
-        \__embrac_replace:Nnxxnn #1
-          { \embrac_allow_break:n { \lastpenalty } }
+        \__embrac_replace:Nxxnn #1
           { \prop_item:Nn \l__embrac_emph_obrackets_outer_prop {##1} }
           { \prop_item:Nn \l__embrac_emph_obrackets_symbol_prop {##1} }
           {##2}
@@ -149,39 +144,42 @@
       }
     \prop_map_inline:Nn \l__embrac_emph_cbrackets_inner_prop
       {
-        \__embrac_replace:Nnnxxn #1
-          { \embrac_save_penalty: \embrac_nobreak: }
+        \__embrac_replace:Nnxxn #1
           {##2}
           { \prop_item:Nn \l__embrac_emph_cbrackets_symbol_prop {##1} }
           { \prop_item:Nn \l__embrac_emph_cbrackets_outer_prop {##1} }
-          { \embrac_allow_break:n { \l__embrac_penalty_int } }
+          {
+            \peek_charcode:NTF \c_space_tl
+              { \embrac_allow_break: }
+              { \embrac_nobreak: }
+          }
       }
   }
 
 \cs_new_protected:Npn \embrac_enparen:nnn #1#2#3
   {
-    \group_begin:
-      \embrac_allow_break:n { \lastpenalty }
-       \embrac_kern:n
-         { \prop_item:Nn \l__embrac_emph_obrackets_outer_prop {#1} }
-      \embrac_nobreak:
-      \embrac_braces_format:n
-         { \prop_item:Nn \l__embrac_emph_obrackets_symbol_prop {#1} }
-      \embrac_nobreak:
-      \embrac_kern:n
-        { \prop_item:Nn \l__embrac_emph_obrackets_inner_prop {#1} }
-      #3
-      \embrac_save_penalty: \embrac_nobreak:
-      \embrac_kern:n
-        { \prop_item:Nn \l__embrac_emph_cbrackets_inner_prop {#2} }
-      \embrac_nobreak:
-      \embrac_braces_format:n
-        { \prop_item:Nn \l__embrac_emph_cbrackets_symbol_prop {#2} }
-      \embrac_nobreak:
-      \embrac_kern:n
-        { \prop_item:Nn \l__embrac_emph_cbrackets_outer_prop {#2} }
-      \embrac_allow_break:n { \l__embrac_penalty_int }
-    \group_end:  
+    \embrac_nobreak:
+    \embrac_kern:n
+      { \prop_item:Nn \l__embrac_emph_obrackets_outer_prop {#1} }
+    \embrac_nobreak:
+    \embrac_braces_format:n
+      { \prop_item:Nn \l__embrac_emph_obrackets_symbol_prop {#1} }
+    \embrac_nobreak:
+    \embrac_kern:n
+      { \prop_item:Nn \l__embrac_emph_obrackets_inner_prop {#1} }
+    #3
+    \embrac_nobreak:
+    \embrac_kern:n
+      { \prop_item:Nn \l__embrac_emph_cbrackets_inner_prop {#2} }
+    \embrac_nobreak:
+    \embrac_braces_format:n
+      { \prop_item:Nn \l__embrac_emph_cbrackets_symbol_prop {#2} }
+    \embrac_nobreak:
+    \embrac_kern:n
+      { \prop_item:Nn \l__embrac_emph_cbrackets_outer_prop {#2} }
+    \peek_charcode:NTF \c_space_tl
+      { \embrac_allow_break: }
+      { \embrac_nobreak: }
   }
 
 % --------------------------------------------------------------------------
@@ -243,11 +241,14 @@
       }
   }
 
-\embrac_new_replacement_macro:n {emph}
-\embrac_new_replacement_macro:n {textit}
-\embrac_new_replacement_macro:n {textsl}
+\NewDocumentCommand \EmbracMakeKnown {m}
+  { \embrac_new_replacement_macro:n {#1} }
+  
+\EmbracMakeKnown {emph}
+\EmbracMakeKnown {textit}
+\EmbracMakeKnown {textsl}
 \AtBeginDocument
-  { \embrac_if_fontspec:T { \embrac_new_replacement_macro:n {textsi} } }
+  { \embrac_if_fontspec:T { \EmbracMakeKnown {textsi} } }
 
 % --------------------------------------------------------------------------
 % TURNING EMBRAC OFF AND ON:
@@ -518,3 +519,5 @@
                      other than 12 is possible)
 2019/10/01 - v0.8  - fix issue #9
                    - new macros \embparen, \embbracket and \emb
+2019/12/31 - v0.9  - new: \EmbracMakeKnown
+                   - change penalties

@@ -1,7 +1,7 @@
-% arara: pdflatex
-% !arara: biber
-% !arara: pdflatex
-% arara: pdflatex
+% arara: pdflatex: { interaction: nonstopmode }
+% arara: biber
+% arara: pdflatex: { interaction: nonstopmode }
+% arara: pdflatex: { interaction: nonstopmode }
 % --------------------------------------------------------------------------
 % the EMBRAC package
 % 
@@ -41,6 +41,7 @@
     ChangeEmph,
     DeleteEmph,
     emb,embbracket,embparen,
+    EmbracMakeKnown,
     EmbracOff,
     EmbracOn,
     printbibliography,
@@ -292,6 +293,22 @@ By the way: this packages provides a simple file
 \code{embrac\_kerning\_test.tex} for testing kerning values.  You should find
 it in the same directory as this documentation.
 
+\section{Adding More Commands}
+If\sinceversion{0.9} you like to add additional macros to \embrac's treatment
+(in addition to the already known \cs*{emph}, \cs*{textit}, \cs*{textsl}, and
+\cs*{textsi}) then you can use the following command
+\begin{commands}
+  \command{EmbracMakeKnown}[\marg{command}]
+    Redefine the command \meta{command} to replace brackets and parentheses by
+    upright ones. \meta{command} is the name of the command \emph{without} the
+    leading backslash!
+\end{commands}
+\embrac\ does this:  
+\begin{sourcecode}
+  \EmbracMakeKnown{emph}
+  \EmbracMakeKnown{textit}
+  \EmbracMakeKnown{textsl}
+\end{sourcecode}
 
 \section{biblatex Compatibility}
 This is \embrac's only package option:
@@ -333,13 +350,13 @@ Please be aware that \embrac\ does not affect \cs{itshape} nor \cs{em} (nor
 In cases like this one of the following commands could be used:
 \begin{commands}
   \command{emb}[\marg{op}\marg{cl}\marg{text}]
-    Encloses\sinceversion{v0.8} \meta{text} with \meta{op} and \meta{cl}. Both
+    Encloses\sinceversion{0.8} \meta{text} with \meta{op} and \meta{cl}. Both
     \meta{op} and \meta{cl} must be brackets known to \embrac.
   \command{embparen}[\marg{text}]
-    Encloses\sinceversion{v0.8} \meta{text} with upright parentheses.  This is
+    Encloses\sinceversion{0.8} \meta{text} with upright parentheses.  This is
     the same as \cs{emb}\Marg{(}\Marg{)}\marg{text}.
   \command{embbracket}[\marg{text}]
-    Encloses\sinceversion{v0.8} \meta{text} with upright brackets.  This is
+    Encloses\sinceversion{0.8} \meta{text} with upright brackets.  This is
     the same as \cs{emb}\Marg{[}\Marg{]}\marg{text}.
 \end{commands}
 \begin{example}
@@ -356,6 +373,7 @@ In cases like this one of the following commands could be used:
   \item[v0.6] Added support for \cs{textsl}.
   \item[v0.7] Added support for symbols with a catcode other than~12.
   \item[v0.8] Added \cs{embparen}, \cs{embbracket} and \cs{emb}.
+  \item[v0.9] Added \cs{EmbracMakeKnown}
 \end{description}
 
 \end{document}
