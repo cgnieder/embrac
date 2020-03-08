@@ -6,7 +6,7 @@
 % 
 % --------------------------------------------------------------------------
 % Clemens Niederberger
-% Web:    https://bitbucket.org/cgnieder/embrac/
+% Web:    https://github.com/cgnieder/embrac/
 % E-Mail: contact@mychemistry.eu
 % --------------------------------------------------------------------------
 % Copyright 2012 Clemens Niederberger
@@ -31,12 +31,18 @@
 % feel free to contact me.
 % --------------------------------------------------------------------------
 \documentclass{scrartcl}
-% \usepackage[T1]{fontenc}
-\usepackage{fontspec}
+\usepackage[T1]{fontenc}
+% \usepackage{fontspec}
 
 % load desired font, for example:
-\usepackage{libertine}
+% \usepackage{libertine}
 % \setmainfont{Minion Pro}
+\usepackage[p,osf]{ETbb} % osf in text, tabular lining figures in math
+\usepackage[scaled=.95,type1]{cabin} % sans serif in style of Gill Sans
+\usepackage[varqu,varl]{zi4}% inconsolata typewriter
+\usepackage[T1]{fontenc} % LY1 also works
+\usepackage[libertine,vvarbb]{newtxmath}
+
 
 \usepackage{embrac}
 
@@ -66,8 +72,9 @@
 \hrulefill
 
 % your changes:
-% \RenewEmph{[}[<io>,<oo>]{]}[<ic>,<oc>]
-% \RenewEmph{(}[<io>,<oo>]{)}[<ic>,<oc>]
+% oo(io ic)oc
+\RenewEmph{[}[0pt,-.09em]{]}[.055em,-.09em]
+\ChangeEmph{(}[-.01em,-.09em]{)}[.04em,-.09em]
 \emph{This is emphasized [sic] text with [long] bla.}
 
 \emph{This is emphasized text [as you can see].}

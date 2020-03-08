@@ -5,7 +5,7 @@
 % 
 % --------------------------------------------------------------------------
 % Clemens Niederberger
-% Web:    https://bitbucket.org/cgnieder/embrac/
+% Web:    https://github.com/cgnieder/embrac/
 % E-Mail: contact@mychemistry.eu
 % --------------------------------------------------------------------------
 % Copyright 2012--2019 Clemens Niederberger
@@ -37,6 +37,13 @@
   {2019/12/31}
   {0.9}
   {Upright Brackets in Emphasized Text}
+
+% --------------------------------------------------------------------------
+\msg_new:nnn {embrac} {patching}
+  { Patching~ \token_to_str:c {#1} ... }
+
+\msg_new:nnn {embrac} {not-patching}
+  { \token_to_str:c {#1} ~ not~ defined.~ Not~ patching~ it ... }
 
 % --------------------------------------------------------------------------
 \bool_new:N \l__embrac_treat_biblatex_bool
@@ -215,30 +222,35 @@
 % #1: name of macro to be treated
 \cs_new_protected:Npn \embrac_new_replacement_macro:n #1
   {
-    \seq_put_right:Nn \l__embrac_changed_macros_seq {#1}
-    \cs_new_eq:cc {embrac_orig_#1:n} {#1~}
-    \cs_generate_variant:cn {embrac_orig_#1:n} {V}
-    \cs_new_protected:cpn {__embrac_#1:n} ##1
+    \cs_if_exist:cTF {#1}
       {
-        \tl_set:Nn \l__embrac_tmpa_tl {##1}
-        \embrac_replace_brackets:N \l__embrac_tmpa_tl
-        \use:c {embrac_orig_#1:V} \l__embrac_tmpa_tl
+        \msg_info:nnn {embrac} {patching} {#1}
+        \seq_put_right:Nn \l__embrac_changed_macros_seq {#1}
+        \cs_new_eq:cc {embrac_orig_#1:n} {#1~}
+        \cs_generate_variant:cn {embrac_orig_#1:n} {V}
+        \cs_new_protected:cpn {__embrac_#1:n} ##1
+          {
+            \tl_set:Nn \l__embrac_tmpa_tl {##1}
+            \embrac_replace_brackets:N \l__embrac_tmpa_tl
+            \use:c {embrac_orig_#1:V} \l__embrac_tmpa_tl
+          }
+        \cs_new_protected:cpn {embrac_#1:nn} ##1##2
+          {
+            \group_begin:
+              \embrac_treat_bibparens:
+              \tl_if_eq:nnTF {##1} {*}
+                { \use:c {embrac_orig_#1:n} {##2} }
+                { \use:c {__embrac_#1:n} {##2} }
+            \group_end:
+          }
+        \exp_args:Nc \RenewDocumentCommand {#1} {sm}
+          {
+            \IfBooleanTF {##1}
+              { \use:c {embrac_#1:nn} {*} {##2} }
+              { \use:c {embrac_#1:nn} { } {##2} }
+          }
       }
-    \cs_new_protected:cpn {embrac_#1:nn} ##1##2
-      {
-        \group_begin:
-          \embrac_treat_bibparens:
-          \tl_if_eq:nnTF {##1} {*}
-            { \use:c {embrac_orig_#1:n} {##2} }
-            { \use:c {__embrac_#1:n} {##2} }
-        \group_end:
-      }
-    \exp_args:Nc \RenewDocumentCommand {#1} {sm}
-      {
-        \IfBooleanTF {##1}
-          { \use:c {embrac_#1:nn} {*} {##2} }
-          { \use:c {embrac_#1:nn} { } {##2} }
-      }
+      { \msg_info:nnn {embrac} {not-patching} {#1} }
   }
 
 \NewDocumentCommand \EmbracMakeKnown {m}
@@ -512,7 +524,7 @@
 2014/06/24 - v0.6  - add support for \textsl
 2014/07/03 - v0.6a - bugfix: remove unwanted (and unnecessary) expansion in
                      \__embrac_emph:n
-2015/09/06 - v0.6b - fix https://bitbucket.org/cgnieder/embrac/issues/5
+2015/09/06 - v0.6b - fix https://github.com/cgnieder/embrac/issues/5
 2015/11/13 - v0.6c - avoid code duplication
 2016/01/07 - v0.6d - \prop_get:Nn => \prop_item:Nn
 2017/07/04 - v0.7  - implement issue #8 (now treatment of symbols with catcode
